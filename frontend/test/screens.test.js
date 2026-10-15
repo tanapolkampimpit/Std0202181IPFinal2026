@@ -97,9 +97,12 @@ test('employee form validates, posts a Number and refreshes the list', async () 
 });
 test('toggle updates the status; Delete waits for a native confirmation and Cancel makes no request', async () => {
   await render(<App />); await signIn();
-  await fireEvent.press(screen.getByRole('button', { name: 'Actions for John Doe' }));
+  expect(screen.getByText('Set On Leave')).toBeTruthy();
+  expect(screen.getByLabelText('John Doe: Active')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Toggle Status for John Doe' }));
   await waitFor(() => expect(employees[0].status).toBe('On Leave'));
+  await screen.findByText('Set Active');
+  expect(screen.getByLabelText('John Doe: On Leave')).toBeTruthy();
   await waitFor(() => expect(screen.getByRole('button', { name: 'Actions for John Doe' })).toBeEnabled());
   await fireEvent.press(screen.getByRole('button', { name: 'Actions for John Doe' }));
   await waitFor(() => expect(screen.getByRole('button', { name: 'Delete John Doe' })).toBeEnabled());
@@ -174,16 +177,25 @@ test('analytics failure offers Retry and a successful retry clears the error', a
   expect(screen.queryByText('Analysis temporarily unavailable.')).toBeNull();
 });
 
-test('selecting K requests the selected number of real API groups', async () => {
+test.each([4, 10])('selecting K=%i shows distinct, consistent group colors and requests real API groups', async (k) => {
   await render(<App />); await signIn();
   await fireEvent.press(screen.getByRole('button', { name: 'Analyze Salary Structure' }));
   await screen.findByText('Group 1 (Low)');
   await fireEvent.press(screen.getByRole('button', { name: 'Choose number of salary groups, current K 3' }));
-  await fireEvent.press(screen.getByRole('button', { name: '4 salary groups' }));
-  await screen.findAllByText('Group 4');
-  expect(fetch).toHaveBeenCalledWith(expect.stringContaining('/api/employees/salary-clusters?k=4'), expect.anything());
-    expect(screen.getAllByText(/^Group [1234]$/)).toHaveLength(8); // group cards and chart labels
+  await fireEvent.press(screen.getByRole('button', { name: `${k} salary groups` }));
+  await screen.findAllByText(`Group ${k}`);
+  expect(fetch).toHaveBeenCalledWith(expect.stringContaining(`/api/employees/salary-clusters?k=${k}`), expect.anything());
+    expect(screen.getAllByText(/^Group \d+$/)).toHaveLength(k * 2); // group cards and chart labels
+    const groupColors = Array.from({ length: k }, (_, i) => {
+      const card = screen.getByTestId(`salary-group-${i + 1}`);
+      const bar = screen.getByTestId(`salary-bar-${i + 1}`);
+      const color = card.props.style.flat().find((style) => style.borderLeftColor)?.borderLeftColor;
+      expect(color).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(bar).toHaveStyle({ backgroundColor: color });
+      return color;
+    });
+    expect(new Set(groupColors).size).toBe(k);
     for (const title of ['Average Salary by Tier', 'Employee Distribution', 'Salary Range & Centroid', 'K-Means Salary Clusters']) expect(screen.getByText(title)).toBeTruthy();
-    expect(screen.getByLabelText(/Salary scatter plot: 1 employees in 4 salary tiers/)).toBeTruthy();
+    expect(screen.getByLabelText(new RegExp(`Salary scatter plot: 1 employees in ${k} salary tiers`))).toBeTruthy();
     expect(screen.getByLabelText('Tier 1: minimum ฿45,000.00, average ฿45,000.00, maximum ฿45,000.00')).toBeTruthy();
 });

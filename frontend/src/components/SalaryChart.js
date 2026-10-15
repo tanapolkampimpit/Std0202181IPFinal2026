@@ -1,8 +1,8 @@
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from './Typography';
-import { colors, formatTHB, tierColors } from '../theme';
-import ChartPanel from './ChartPanel';
+import { colors, formatTHB } from '../theme';
+import ChartPanel, { chartColor } from './ChartPanel';
 
 const compact = (value) => new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
 const chartHeight = 180;
@@ -22,7 +22,7 @@ export default function SalaryChart({ clusters }) {
         {clusters.map((cluster, index) => <View key={cluster.group} style={styles.column} accessible accessibilityLabel={`Group ${index + 1}: ${cluster.centroid === null ? 'no salary data' : formatTHB(cluster.centroid)} average monthly salary`}>
           <View style={styles.barSpace}>
             <Text style={styles.value}>{cluster.centroid === null ? '—' : `฿${compact(cluster.centroid)}`}</Text>
-            <View style={[styles.bar, { height: cluster.centroid === null ? 0 : Math.max(2, cluster.centroid / ceiling * plotHeight), backgroundColor: tierColors[index % tierColors.length].bar }]} />
+            <View testID={`salary-bar-${index + 1}`} style={[styles.bar, { height: cluster.centroid === null ? 0 : Math.max(2, cluster.centroid / ceiling * plotHeight), backgroundColor: chartColor(index) }]} />
           </View><Text style={styles.barLabel}>Group {index + 1}</Text>
         </View>)}
       </View>

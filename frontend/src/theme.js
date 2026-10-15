@@ -11,9 +11,16 @@ export const colors = {
   blue: '#4089D8', purple: '#9559CE', blueTint: '#EAF4FE', purpleTint: '#F3ECFB',
 };
 export const tierColors = [
-  { accent: '#26B77D', tint: '#EAF7F1', icon: '#D8F3E4', bar: '#73C3AE' },
-  { accent: '#519BEE', tint: '#EAF4FE', icon: '#DCEBFF', bar: '#7BBBF4' },
-  { accent: '#A66BE0', tint: '#F3ECFB', icon: '#E9DDF9', bar: '#AD83E7' },
+  { accent: '#087F5B', tint: '#EAF7F1', icon: '#D8F3E4' },
+  { accent: '#2563EB', tint: '#EFF4FF', icon: '#DCE7FF' },
+  { accent: '#7C3AED', tint: '#F4EFFF', icon: '#E9DDFF' },
+  { accent: '#C65B00', tint: '#FFF4E8', icon: '#FFE3C2' },
+  { accent: '#D12D43', tint: '#FFF0F2', icon: '#FFDCE2' },
+  { accent: '#007C91', tint: '#EAF8FB', icon: '#CDEEF4' },
+  { accent: '#BE267A', tint: '#FFF0F8', icon: '#FAD9EB' },
+  { accent: '#6F7600', tint: '#F6F8E8', icon: '#E8EDBF' },
+  { accent: '#89532B', tint: '#FAF1EA', icon: '#EFDDCE' },
+  { accent: '#45536D', tint: '#EFF2F7', icon: '#DCE2EE' },
 ];
 export const fonts = {
   body: 'NotoSansThai_400Regular',

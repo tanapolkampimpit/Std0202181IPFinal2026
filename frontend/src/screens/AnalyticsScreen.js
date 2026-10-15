@@ -45,8 +45,8 @@ export default function AnalyticsScreen({ onBack }) {
       {loading && <View style={styles.loading}><ActivityIndicator size="large" color={colors.primary} accessibilityLabel="Analyzing salaries" /><Text style={ui.body}>Analyzing salary structure…</Text></View>}
       <Feedback message={error} retry={analyze} />
       {!loading && clusters && <>
-        {clusters.map((cluster, index) => <View key={cluster.group} style={[styles.cluster, { backgroundColor: tierColors[index % tierColors.length].tint, borderLeftColor: tierColors[index % tierColors.length].accent }]}>
-          <View style={[styles.clusterIcon, { backgroundColor: tierColors[index % tierColors.length].icon }]}><Icon name="people-outline" color={index % 3 === 0 ? colors.successText : index % 3 === 1 ? colors.blue : colors.purple} size={22} /></View>
+        {clusters.map((cluster, index) => <View key={cluster.group} testID={`salary-group-${index + 1}`} style={[styles.cluster, { backgroundColor: tierColors[index % tierColors.length].tint, borderLeftColor: tierColors[index % tierColors.length].accent }]}>
+          <View style={[styles.clusterIcon, { backgroundColor: tierColors[index % tierColors.length].icon }]}><Icon name="people-outline" color={tierColors[index % tierColors.length].accent} size={22} /></View>
           <View style={styles.clusterIdentity}><Text style={styles.clusterName}>{`Group ${index + 1}${k === 3 ? ` (${['Low', 'Medium', 'High'][index]})` : ''}`}</Text><Text style={styles.clusterCount}>{cluster.count} {cluster.count === 1 ? 'employee' : 'employees'}</Text></View>
           <View style={styles.clusterValue}><Text style={styles.averageLabel}>Average Salary</Text><Text style={styles.salary} adjustsFontSizeToFit minimumFontScale={0.75} numberOfLines={1}>{formatTHB(cluster.centroid, true)}</Text></View>
         </View>)}

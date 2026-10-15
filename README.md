@@ -181,6 +181,8 @@ Configuration is read from `backend/.env`, including when started from another w
 
 In the employee actions menu, choose **Edit**, change the name/position/salary, and choose **Save Changes**. The app sends PUT to the API and reloads the current MySQL list after saving. Delete permanently removes the selected row after confirmation.
 
+เปลี่ยนสถานะได้จากปุ่ม **Set On Leave / Set Active** บนการ์ดพนักงานโดยตรง พร้อมป้ายสถานะและไอคอนที่แยก Active / On Leave ชัดเจน กราฟ K-Means เลือก K ได้ 1–10 กลุ่ม แต่ละกลุ่มใช้สีต่างกัน และใช้สีเดียวกันสำหรับกลุ่มนั้นในทั้งสี่กราฟและการ์ดสรุป
+
 Sign-in is remembered across reloads and app restarts until the API token expires (currently 8 hours), the server rejects the session, or the user chooses Logout. Web stores the token and username in localStorage; Android/iOS use Expo SecureStore. Passwords and employee records are never included in session storage. The app waits for session restoration before showing sign-in, discards malformed/expired sessions and sessions for a different API address, and clears saved sign-in on Logout or HTTP 401. A network outage alone does not sign the user out. If device/browser storage is unavailable, sign-in still works for the current app session.
 
 ## API
