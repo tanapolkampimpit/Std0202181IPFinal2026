@@ -33,7 +33,7 @@ function Workspace() {
     <View style={styles.content}>{screen === 'analytics' ? <AnalyticsScreen onBack={() => setScreen('home')} /> : <DashboardScreen directoryOnly={screen === 'employees'} onHome={() => setScreen('home')} onAnalyze={() => setScreen('analytics')} />}</View>
     <View style={styles.navigation}><View style={styles.navigationInner} accessibilityRole="tablist">{tabs.map((tab) => <Pressable key={tab.id} accessibilityRole={tab.id === 'logout' ? 'button' : 'tab'} accessibilityState={tab.id === 'logout' ? {} : { selected: screen === tab.id }} accessibilityLabel={tab.label}
       onPress={tab.id === 'logout' ? logout : () => setScreen(tab.id)} style={({ pressed, focused }) => [styles.tab, pressed && styles.pressed, focused && styles.focused]}>
-      <Icon name={tab.icon} size={21} color={screen === tab.id ? colors.primary : colors.muted} /><Text style={[styles.tabText, screen === tab.id && styles.active]}>{tab.label}</Text>
+      <Icon name={tab.icon} size={21} color={tab.id === 'logout' ? colors.danger : screen === tab.id ? colors.primary : colors.muted} /><Text style={[styles.tabText, screen === tab.id && styles.active, tab.id === 'logout' && styles.logout]}>{tab.label}</Text>
     </Pressable>)}</View></View>
   </SafeAreaView>;
 }
@@ -59,5 +59,5 @@ const styles = StyleSheet.create({
   fontLoading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, backgroundColor: colors.background }, fontError: { fontSize: 16, color: colors.text }, fontRetry: { minHeight: 48, padding: 12, borderWidth: 1, borderColor: colors.primary, borderRadius: 12 },
   root: { flex: 1, backgroundColor: colors.surface }, content: { flex: 1 },
   navigation: { backgroundColor: colors.surface, borderTopWidth: 1, borderColor: colors.border }, navigationInner: { width: '100%', maxWidth: 760, alignSelf: 'center', flexDirection: 'row', paddingVertical: 7, paddingHorizontal: 10 },
-  tab: { flex: 1, minHeight: 48, gap: 4, alignItems: 'center', justifyContent: 'center', borderRadius: 10 }, tabText: { color: colors.muted, fontSize: 12 }, active: { color: colors.primary, fontWeight: '700' }, pressed: { opacity: 0.6 }, focused: { outlineWidth: 2, outlineColor: colors.teal },
+  tab: { flex: 1, minHeight: 48, gap: 4, alignItems: 'center', justifyContent: 'center', borderRadius: 10 }, tabText: { color: colors.muted, fontSize: 12 }, active: { color: colors.primary, fontWeight: '700' }, logout: { color: colors.danger }, pressed: { opacity: 0.6 }, focused: { outlineWidth: 2, outlineColor: colors.teal },
 });
