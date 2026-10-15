@@ -1,32 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Button, Icon, ui } from './ui';
-import { colors, fonts, formatTHB, shadow } from '../theme';
+import { Button, IconButton } from './ui';
+import { colors, fonts, formatTHB } from '../theme';
 
-export default function EmployeeCard({ employee, busy, onToggle, onDelete }) {
+export default function EmployeeCard({ employee, busy, onToggle, onDelete, index = 0 }) {
+  const [open, setOpen] = useState(false);
   const active = employee.status === 'Active';
   const initials = employee.name.trim().split(/\s+/).slice(0, 2).map((part) => Array.from(part)[0]).join('').toUpperCase();
+  function act(action) { setOpen(false); action(employee); }
   return <View style={styles.card}>
-    <View style={ui.row}>
-      <View style={styles.avatar}><Text style={styles.initials}>{initials}</Text></View>
-      <View style={styles.identity}><Text style={styles.name}>{employee.name}</Text><Text style={styles.position}>{employee.position}</Text></View>
+    <View style={styles.row}>
+      <View style={[styles.avatar, index % 3 === 2 && styles.alternateAvatar]}><Text style={styles.initials}>{initials}</Text></View>
+      <View style={styles.identity}><Text style={styles.name} numberOfLines={1}>{employee.name}</Text><Text style={styles.position} numberOfLines={1}>{employee.position}</Text></View>
+      <View style={styles.side}><Text style={styles.salary}>{formatTHB(employee.salary, true)}</Text>
+        <View style={[styles.badge, { backgroundColor: active ? colors.successTint : colors.warningTint }]}><View style={[styles.dot, { backgroundColor: active ? colors.successText : colors.warningText }]} /><Text style={[styles.status, { color: active ? colors.successText : colors.warningText }]}>{employee.status}</Text></View>
+      </View>
+      <IconButton label={`Actions for ${employee.name}`} icon={open ? 'close-outline' : 'ellipsis-vertical'} expanded={open} disabled={busy} onPress={() => setOpen((current) => !current)} style={styles.menuButton} />
     </View>
-    <View style={styles.details}>
-      <View><Text style={styles.salaryLabel}>BASE SALARY / MONTH</Text><Text style={styles.salary}>{formatTHB(employee.salary)}</Text></View>
-      <View style={[styles.badge, { backgroundColor: active ? colors.successTint : colors.warningTint }]}><Icon name={active ? 'checkmark-circle' : 'time-outline'} size={13} color={active ? colors.successText : colors.warningText} /><Text style={[styles.status, { color: active ? colors.successText : colors.warningText }]}>{employee.status}</Text></View>
-    </View>
-    <View style={styles.actions}>
-      <Button title="Toggle Status" accessibilityLabel={`Toggle Status for ${employee.name}`} icon="swap-horizontal-outline" variant="secondary" disabled={busy} onPress={() => onToggle(employee)} style={styles.toggle} />
-      <Button title="Delete" accessibilityLabel={`Delete ${employee.name}`} icon="trash-outline" variant="danger" disabled={busy} onPress={() => onDelete(employee)} />
-    </View>
+    {open && <View style={styles.actions}>
+      <Button title="Toggle Status" accessibilityLabel={`Toggle Status for ${employee.name}`} icon="swap-horizontal-outline" variant="secondary" disabled={busy} onPress={() => act(onToggle)} style={styles.toggle} />
+      <Button title="Delete" accessibilityLabel={`Delete ${employee.name}`} icon="trash-outline" variant="danger" disabled={busy} onPress={() => act(onDelete)} />
+    </View>}
   </View>;
 }
 const styles = StyleSheet.create({
-  card: { backgroundColor: colors.surface, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: colors.border, gap: 16, ...shadow },
-  avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.lightBlue, alignItems: 'center', justifyContent: 'center' }, initials: { color: colors.primary, fontSize: 17, fontWeight: '700' },
-  identity: { flex: 1, gap: 4 }, name: { color: colors.text, fontFamily: fonts.body, fontSize: 16, fontWeight: '700' }, position: { color: colors.muted, fontSize: 13, lineHeight: 20 },
-  details: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' },
-  salaryLabel: { fontSize: 9, letterSpacing: 1, color: colors.muted, marginBottom: 4, fontWeight: '600' }, salary: { color: colors.text, fontSize: 19, fontWeight: '700', fontVariant: ['tabular-nums'] },
-  badge: { flexDirection: 'row', gap: 4, alignItems: 'center', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 6 }, status: { fontWeight: '600', fontSize: 11 },
-  actions: { flexDirection: 'row', gap: 8, paddingTop: 12, borderTopWidth: 1, borderColor: colors.border }, toggle: { flex: 1 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, paddingVertical: 9, paddingLeft: 10, paddingRight: 2, borderWidth: 1, borderColor: '#EFF5F2' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 9 }, avatar: { width: 38, height: 38, borderRadius: 19, backgroundColor: colors.avatar, alignItems: 'center', justifyContent: 'center' }, alternateAvatar: { backgroundColor: '#E5EBE6' },
+  initials: { color: colors.primary, fontSize: 13, fontWeight: '800' }, identity: { flex: 1, minWidth: 0, gap: 5 },
+  name: { color: colors.text, fontFamily: fonts.body, fontSize: 12, fontWeight: '700' }, position: { color: colors.muted, fontSize: 10 },
+  side: { alignItems: 'flex-end', gap: 5 }, salary: { color: colors.text, fontSize: 12, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  badge: { flexDirection: 'row', gap: 4, alignItems: 'center', borderRadius: 20, paddingHorizontal: 6, paddingVertical: 4 }, dot: { width: 4, height: 4, borderRadius: 2 }, status: { fontWeight: '500', fontSize: 9 },
+  menuButton: { width: 32, minHeight: 44 }, actions: { flexDirection: 'row', gap: 8, paddingTop: 9, marginTop: 9, marginRight: 8, borderTopWidth: 1, borderColor: colors.border }, toggle: { flex: 1 },
 });

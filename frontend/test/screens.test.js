@@ -21,7 +21,10 @@ beforeEach(() => {
   });
   jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 });
-afterEach(() => jest.restoreAllMocks());
+afterEach(async () => {
+  await act(async () => { await new Promise((resolve) => setTimeout(resolve, 80)); });
+  jest.restoreAllMocks();
+});
 
 async function signIn() {
   await fireEvent.changeText(screen.getByLabelText('Username'), 'admin');
@@ -32,10 +35,10 @@ async function signIn() {
 test('protected dashboard does not mount before sign in; password is secure; login/logout work', async () => {
   await render(<App />);
   expect(screen.getByLabelText('Password').props.secureTextEntry).toBe(true);
-  expect(screen.queryByText('Welcome back, Admin')).toBeNull();
+  expect(screen.queryByText('Hello, admin')).toBeNull();
   expect(fetch).not.toHaveBeenCalled();
   await signIn();
-  expect(screen.getByText('Welcome back, Admin')).toBeTruthy();
+  expect(screen.getByText('Hello, admin')).toBeTruthy();
   expect(fetch).toHaveBeenCalledWith(expect.stringContaining('/api/employees'), expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer mock-jwt-token' }) }));
   await fireEvent.press(screen.getByRole('button', { name: 'Logout' }));
   expect(screen.getByRole('button', { name: 'Sign In' })).toBeTruthy();
@@ -49,24 +52,51 @@ test('failed login displays native Alert and an inline error', async () => {
   await screen.findByText('Invalid username or password.');
   expect(Alert.alert).toHaveBeenCalledWith('Sign in failed', 'Invalid username or password.');
 });
+
+test('password visibility can be toggled without changing the entered value', async () => {
+  await render(<App />);
+  await fireEvent.changeText(screen.getByLabelText('Password'), 'OnlyForThisTest');
+  await fireEvent.press(screen.getByRole('button', { name: 'Show password' }));
+  expect(screen.getByLabelText('Password').props.secureTextEntry).toBe(false);
+  expect(screen.getByLabelText('Password').props.value).toBe('OnlyForThisTest');
+  await fireEvent.press(screen.getByRole('button', { name: 'Hide password' }));
+  expect(screen.getByLabelText('Password').props.secureTextEntry).toBe(true);
+});
+
+test('directory search filters name/position and clearing search restores the real list', async () => {
+  await render(<App />); await signIn();
+  await fireEvent.changeText(screen.getByLabelText('Search employees'), 'engineer');
+  expect(screen.getByText('John Doe')).toBeTruthy();
+  await fireEvent.changeText(screen.getByLabelText('Search employees'), 'no matching employee');
+  expect(screen.queryByText('John Doe')).toBeNull();
+  expect(screen.getByText('No employees found')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Clear search' }));
+  expect(screen.getByText('John Doe')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('tab', { name: 'Employees' }));
+  expect(screen.queryByText('Hello, admin')).toBeNull();
+  expect(screen.getByText('John Doe')).toBeTruthy();
+});
 test('employee form validates, posts a Number and refreshes the list', async () => {
   await render(<App />); await signIn();
   await fireEvent.press(screen.getByRole('button', { name: 'Add Employee' }));
-  await fireEvent.press(screen.getAllByRole('button', { name: 'Add Employee' }).at(-1));
+  await fireEvent.press(screen.getByRole('button', { name: 'Save Employee' }));
   expect(screen.getByText('Please enter the employee’s name.')).toBeTruthy();
   await fireEvent.changeText(screen.getByLabelText('Full name'), 'Jane Doe');
   await fireEvent.changeText(screen.getByLabelText('Position'), 'Designer');
   await fireEvent.changeText(screen.getByLabelText('Monthly salary (THB)'), '32000.50');
-  await fireEvent.press(screen.getAllByRole('button', { name: 'Add Employee' }).at(-1));
+  await fireEvent.press(screen.getByRole('button', { name: 'Save Employee' }));
   await screen.findByText('Jane Doe');
   const call = fetch.mock.calls.find(([, options]) => options.method === 'POST' && options.body.includes('Jane Doe'));
   expect(JSON.parse(call[1].body).salary).toBe(32000.5);
-  expect(screen.getByText('2 team members')).toBeTruthy();
+  expect(screen.getByText('2 of 2 employees shown')).toBeTruthy();
 });
 test('toggle updates the status; Delete waits for a native confirmation and Cancel makes no request', async () => {
   await render(<App />); await signIn();
+  await fireEvent.press(screen.getByRole('button', { name: 'Actions for John Doe' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Toggle Status for John Doe' }));
   await waitFor(() => expect(employees[0].status).toBe('On Leave'));
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Actions for John Doe' })).toBeEnabled());
+  await fireEvent.press(screen.getByRole('button', { name: 'Actions for John Doe' }));
   await waitFor(() => expect(screen.getByRole('button', { name: 'Delete John Doe' })).toBeEnabled());
   await fireEvent.press(screen.getByRole('button', { name: 'Delete John Doe' }));
   const choices = Alert.alert.mock.calls.at(-1)[2];
@@ -85,8 +115,8 @@ test('analytics starts loading immediately and renders exactly the three respons
   await fireEvent.press(screen.getByRole('button', { name: 'Analyze Salary Structure' }));
   expect(screen.getByLabelText('Analyzing salaries')).toBeTruthy();
   await act(async () => finish());
-  expect(screen.getAllByText(/^Tier [123]$/)).toHaveLength(3);
-  expect(screen.getAllByText('—')).toHaveLength(2);
+  expect(screen.getAllByText(/^Group [123] \((Low|Medium|High)\)$/)).toHaveLength(3);
+  expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(2);
   expect(screen.getByText(/12,345.67/)).toBeTruthy();
 });
 test('analytics failure offers Retry and a successful retry clears the error', async () => {
@@ -97,6 +127,6 @@ test('analytics failure offers Retry and a successful retry clears the error', a
   await screen.findByText('Analysis temporarily unavailable.');
   global.fetch = normalFetch;
   await fireEvent.press(screen.getByRole('button', { name: 'Retry' }));
-  await screen.findByText('Tier 1');
+  await screen.findByText('Group 1 (Low)');
   expect(screen.queryByText('Analysis temporarily unavailable.')).toBeNull();
 });

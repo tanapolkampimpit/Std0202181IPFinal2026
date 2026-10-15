@@ -9,6 +9,8 @@ Repository: https://github.com/tanapolkampimpit/Std0202181IPFinal2026
 - `backend/`: persistent MySQL API, database login, employee/user CRUD, salary clustering and `run.sh`.
 - [Backend deployment guide](backend/README.md): configuration, FileZilla, endpoints and tests.
 
+The frontend follows the supplied BlueHR standalone HTML reference: forest/teal palette, curved login hero, compact employee rows, search, four-item navigation, and three salary groups with a chart. Employee data, counts and chart values come from the API. The reference's sample accounts and employee array are not part of the application.
+
 The backend requires MySQL. It has no employee seed data, memory storage mode, fixed login or fixed bearer token. It reads the existing tables `Thanapol_Kha_Employee` and `Thanapol_Kha_Users` in `ip_std6730202181`. Starting the API does not create tables or insert users/employees.
 
 ## Backend
@@ -102,6 +104,8 @@ npm test
 The SQL integration suite creates a random `bluehr_test_*` database on a loopback server, tests employee/user CRUD, auth/roles, decimals, Unicode, invalid inputs, PHP bcrypt and a real API process restart, then drops only its own database. It never uses the exam `DB_NAME`.
 
 Frontend live integration/browser tests require `BLUEHR_TEST_API_URL`, `BLUEHR_TEST_USERNAME` and `BLUEHR_TEST_PASSWORD` for a disposable environment; they create and remove their own employee record. Without these settings the live integration test is skipped. Component tests use isolated test fixtures; these are not application data.
+
+For a complete visual/interaction check on a local SQL test server, run `npm run test:design` from `frontend/` with the same `DB_TEST_*` settings. It creates its own disposable database, builds an isolated web preview, checks widths 320/375/768/1024/1440 and real login/search/CRUD/analytics/logout, then removes its database. Screenshots and the result JSON are saved under ignored `frontend/test-results/design/`. It does not modify `.env` or connect to the shared exam database. Expo exports were also checked for Android/iOS; device appearance still needs Expo Go or an emulator.
 
 ## Deployment notes
 

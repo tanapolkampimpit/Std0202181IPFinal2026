@@ -10,34 +10,39 @@ import { Icon } from './src/components/ui';
 import { colors } from './src/theme';
 
 function Workspace() {
-  const [screen, setScreen] = useState('team');
+  const { logout } = useAuth();
+  const [screen, setScreen] = useState('home');
   useEffect(() => {
     const handler = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (screen === 'analytics') { setScreen('team'); return true; }
+      if (screen !== 'home') { setScreen('home'); return true; }
       return false;
     });
     return () => handler.remove();
   }, [screen]);
+  const tabs = [
+    { id: 'home', label: 'Home', icon: 'home-outline' },
+    { id: 'employees', label: 'Employees', icon: 'people-outline' },
+    { id: 'analytics', label: 'Analytics', icon: 'stats-chart-outline' },
+    { id: 'logout', label: 'Logout', icon: 'log-out-outline' },
+  ];
   return <SafeAreaView style={styles.root} edges={['top', 'left', 'right', 'bottom']}>
     <StatusBar style="dark" />
-    <View style={styles.content}>{screen === 'team' ? <DashboardScreen onAnalyze={() => setScreen('analytics')} /> : <AnalyticsScreen onBack={() => setScreen('team')} />}</View>
-    <View style={styles.navigation} accessibilityRole="tablist">{[
-      { id: 'team', label: 'Employees', icon: 'people-outline' },
-      { id: 'analytics', label: 'Analytics', icon: 'stats-chart-outline' },
-    ].map((tab) => <Pressable key={tab.id} accessibilityRole="tab" accessibilityState={{ selected: screen === tab.id }} accessibilityLabel={tab.label} onPress={() => setScreen(tab.id)} style={({ pressed }) => [styles.tab, pressed && { opacity: 0.6 }]}>
-      <Icon name={tab.icon} color={screen === tab.id ? colors.primary : colors.muted} /><Text style={[styles.tabText, screen === tab.id && { color: colors.primary, fontWeight: '700' }]}>{tab.label}</Text>
-    </Pressable>)}</View>
+    <View style={styles.content}>{screen === 'analytics' ? <AnalyticsScreen onBack={() => setScreen('home')} /> : <DashboardScreen directoryOnly={screen === 'employees'} onHome={() => setScreen('home')} onAnalyze={() => setScreen('analytics')} />}</View>
+    <View style={styles.navigation}><View style={styles.navigationInner} accessibilityRole="tablist">{tabs.map((tab) => <Pressable key={tab.id} accessibilityRole={tab.id === 'logout' ? 'button' : 'tab'} accessibilityState={tab.id === 'logout' ? {} : { selected: screen === tab.id }} accessibilityLabel={tab.label}
+      onPress={tab.id === 'logout' ? logout : () => setScreen(tab.id)} style={({ pressed, focused }) => [styles.tab, pressed && styles.pressed, focused && styles.focused]}>
+      <Icon name={tab.icon} size={21} color={screen === tab.id ? colors.primary : colors.muted} /><Text style={[styles.tabText, screen === tab.id && styles.active]}>{tab.label}</Text>
+    </Pressable>)}</View></View>
   </SafeAreaView>;
 }
 function AuthGate() {
   const { token } = useAuth();
-  // Protected screens cannot mount (or call employee APIs) before login.
-  return token ? <Workspace /> : <><StatusBar style="dark" /><LoginScreen /></>;
+  return token ? <Workspace /> : <><StatusBar style="light" /><LoginScreen /></>;
 }
 export default function App() {
   return <SafeAreaProvider><AuthProvider><AuthGate /></AuthProvider></SafeAreaProvider>;
 }
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background }, content: { flex: 1 },
-  navigation: { backgroundColor: colors.surface, flexDirection: 'row', borderTopWidth: 1, borderColor: colors.border, paddingVertical: 8, paddingHorizontal: 20, justifyContent: 'center' }, tab: { flex: 1, maxWidth: 280, minHeight: 48, gap: 5, alignItems: 'center', justifyContent: 'center' }, tabText: { color: colors.muted, fontSize: 11 },
+  root: { flex: 1, backgroundColor: colors.surface }, content: { flex: 1 },
+  navigation: { backgroundColor: colors.surface, borderTopWidth: 1, borderColor: colors.border }, navigationInner: { width: '100%', maxWidth: 760, alignSelf: 'center', flexDirection: 'row', paddingVertical: 7, paddingHorizontal: 10 },
+  tab: { flex: 1, minHeight: 48, gap: 4, alignItems: 'center', justifyContent: 'center', borderRadius: 10 }, tabText: { color: colors.muted, fontSize: 10 }, active: { color: colors.primary, fontWeight: '700' }, pressed: { opacity: 0.6 }, focused: { outlineWidth: 2, outlineColor: colors.teal },
 });
