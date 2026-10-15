@@ -2,7 +2,7 @@
 
 API นี้ใช้ตารางจริง `Thanapol_Kha_Employee` และ `Thanapol_Kha_Users` ในฐานข้อมูล `ip_std6730202181` ไม่มีข้อมูลพนักงานตัวอย่างหรือบัญชีล็อกอินตายตัว
 
-คู่มือเริ่มจากอัปโหลด Backend ด้วย FileZilla → ใช้ `ls` / `cd` ใน SSH → รัน Backend → เปิด Frontend และล็อกอิน อยู่ใน [README หลัก](../README.md) หากอ่านไฟล์นี้จากชุดอัปโหลด ให้เปิดคู่มือที่ [GitHub](https://github.com/tanapolkampimpit/Std0202181IPFinal2026#readme) คำสั่งรัน Backend บนเซิร์ฟเวอร์คือ `cd /app/tnpkhr-api` แล้ว `bash run.sh` โดยเปลี่ยน path ให้ตรงกับโฟลเดอร์ที่อัปโหลดจริง
+คู่มือเริ่มจากอัปโหลด Backend ด้วย FileZilla → ใช้ `ls` / `cd` ใน SSH → รัน Backend → เปิด Frontend และล็อกอิน อยู่ใน [README หลัก](../README.md) หากอ่านไฟล์นี้บนเซิร์ฟเวอร์ ให้เปิดคู่มือที่ [GitHub](https://github.com/tanapolkampimpit/Std0202181IPFinal2026#readme) คำสั่งรัน Backend บนเซิร์ฟเวอร์คือ `cd /app/Backend` แล้ว `bash run.sh` โดยเปลี่ยน path ให้ตรงกับโฟลเดอร์ที่อัปโหลดจริง
 
 ## Config
 
@@ -35,9 +35,9 @@ npm start
 
 ## FileZilla + run.sh
 
-อัปโหลดไฟล์ข้างใน `backend/` ผ่าน FileZilla ได้โดยตรง ยกเว้น `.env`, `node_modules`, coverage และผลทดสอบ หรือถ้าต้องการชุดอัปโหลดแยก ให้เปิด Terminal ที่ `backend/` แล้วใช้ `npm run package:filezilla -- ../../TNPKHR_API_FileZilla_upload` จะได้ `TNPKHR_API_FileZilla_upload` ข้างโฟลเดอร์ repository โดยไม่คัดลอก `.env` หรือ `node_modules` หากโฟลเดอร์ปลายทางมีอยู่แล้ว ให้ระบุชื่อใหม่ สคริปต์ไม่ทับไฟล์เดิม หากไม่ระบุปลายทางจะใช้ชื่อ `TNPKHR_API_FileZilla`
+ใช้โฟลเดอร์ **Backend ของโปรเจกต์ คือ [`backend/` บน GitHub](https://github.com/tanapolkampimpit/Std0202181IPFinal2026/tree/main/backend)** ดาวน์โหลดด้วย **Code → Download ZIP** แล้วแตก ZIP หรือใช้ source ที่ clone มา จะเห็น `backend` อยู่ข้าง `frontend` อัปโหลดไฟล์ข้างใน `backend/` ผ่าน FileZilla ได้โดยตรง ยกเว้น `.env`, `node_modules`, coverage และผลทดสอบ ไม่ต้องสร้างชุดอัปโหลดแยก
 
-1. สร้างโฟลเดอร์ใหม่ เช่น `/app/tnpkhr-api` บนเซิร์ฟเวอร์ แล้วอัปโหลดไฟล์ข้างในชุดอัปโหลดเข้าไปโดยตรง ให้ `run.sh` อยู่ที่ `/app/tnpkhr-api/run.sh` ยกเว้น `.env`, `node_modules`, coverage และผลทดสอบ ไม่ทับ `/app/run.sh` หรือ `.env` ของงานอื่น FileZilla ใช้โอนไฟล์ ส่วนการรันใช้ SSH/Terminal
+1. สร้างโฟลเดอร์ `Backend` เช่น `/app/Backend` บนเซิร์ฟเวอร์ แล้วอัปโหลดไฟล์ข้างใน `backend/` เข้าไปโดยตรง ให้ `run.sh` อยู่ที่ `/app/Backend/run.sh` ยกเว้น `.env`, `node_modules`, coverage และผลทดสอบ ไม่ทับ `/app/run.sh` หรือ `.env` ของงานอื่น FileZilla ใช้โอนไฟล์ ส่วนการรันใช้ SSH/Terminal
 2. เปิด SSH/Terminal แล้วเข้าโฟลเดอร์ใหม่
 3. ถ้ามี `.env` ที่ตั้งค่าแล้ว ให้วางไว้ในโฟลเดอร์ใหม่นี้ด้วยตนเอง หากยังไม่มี รันครั้งแรกจะสร้างจาก `.env.example` พร้อม JWT secret สุ่ม แล้วหยุดให้กรอกข้อมูล MySQL
 
@@ -46,7 +46,7 @@ pwd
 ls
 cd /app
 ls
-cd tnpkhr-api
+cd Backend
 ls -la
 bash run.sh
 # หากเพิ่งสร้าง .env สคริปต์จะหยุด ให้แก้ข้อมูล DB และ APP_PORT=3019 ก่อน
@@ -57,7 +57,7 @@ bash run.sh check
 bash run.sh
 ```
 
-`ls` ใช้ดูไฟล์/โฟลเดอร์, `cd` ใช้เข้าโฟลเดอร์ และ `ls -la` แสดงไฟล์ซ่อน เช่น `.env` ก่อนรันต้องเห็น `run.sh` และ `package.json` หากอัปโหลดไว้ path อื่น ให้ใช้ path นั้นแทน `/app/tnpkhr-api`
+`ls` ใช้ดูไฟล์/โฟลเดอร์, `cd` ใช้เข้าโฟลเดอร์ และ `ls -la` แสดงไฟล์ซ่อน เช่น `.env` ก่อนรันต้องเห็น `run.sh` และ `package.json` หากอัปโหลดไว้ path อื่น ให้ใช้ path นั้นแทน `/app/Backend` ชื่อบน Linux แยกตัวพิมพ์ใหญ่/เล็ก ให้พิมพ์ตรงกับชื่อใน FileZilla
 
 บัญชีสำหรับหน้า Frontend ตามที่ระบุสำหรับงานนี้คือ **Username: `Admin` / Password: `password123`** ถ้าฐานข้อมูลยังไม่มีบัญชีนี้จึงค่อยใช้ `bash run.sh create-admin Admin` แล้วกรอก `password123` เมื่อถามรหัสผ่านและกรอกซ้ำเพื่อยืนยัน (ขณะพิมพ์ไม่แสดงตัวอักษร) หากมีบัญชีจริงอยู่แล้วให้ข้ามขั้นตอนนี้ บัญชีและรหัสผ่านต้องตรงกับข้อมูลใน `Thanapol_Kha_Users`
 
@@ -68,7 +68,7 @@ bash run.sh
 `bash run.sh` รันแบบ foreground หากเซิร์ฟเวอร์มี PM2 และต้องการให้ทำงานต่อหลังปิด SSH ให้หยุด foreground ด้วย `Ctrl+C` ก่อน แล้วใช้ชื่อ process ใหม่ที่ไม่ทับงานเดิม:
 
 ```bash
-pm2 start /app/tnpkhr-api/run.sh --interpreter bash --name tnpkhr-ip-final
+pm2 start /app/Backend/run.sh --interpreter bash --name tnpkhr-ip-final
 pm2 logs tnpkhr-ip-final
 ```
 

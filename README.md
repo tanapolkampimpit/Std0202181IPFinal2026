@@ -18,10 +18,12 @@ git clone https://github.com/tanapolkampimpit/Std0202181IPFinal2026.git
 
 ### 1.1 อัปโหลด Backend ด้วย FileZilla
 
+**Backend ที่ใช้คือโฟลเดอร์ [`backend/` ใน repository นี้](https://github.com/tanapolkampimpit/Std0202181IPFinal2026/tree/main/backend)** ดาวน์โหลดโปรเจกต์จาก GitHub ด้วย **Code → Download ZIP** แล้วแตก ZIP จะเห็น `backend` อยู่ข้าง `frontend` หรือใช้ source ที่ clone ไว้แล้วได้เลย ไม่ต้องสร้างชุดอัปโหลดแยก
+
 1. เปิด FileZilla แล้วเชื่อมต่อด้วย Host, Username, Password/Key และ Port ที่ผู้ดูแลเซิร์ฟเวอร์ให้
-2. ฝั่ง **Local (ซ้าย)** เปิดโฟลเดอร์ `Std0202181IPFinal2026/backend`
-3. ฝั่ง **Remote (ขวา)** สร้าง/เปิดโฟลเดอร์ของงาน เช่น `/app/tnpkhr-api`
-4. ลาก **ไฟล์และโฟลเดอร์ข้างใน `backend`** ไปไว้ใน `/app/tnpkhr-api` โดยตรง ยกเว้น `.env`, `node_modules`, coverage และผลทดสอบ
+2. ฝั่ง **Local (ซ้าย)** เปิดโฟลเดอร์ `backend` ของโปรเจกต์ที่ดาวน์โหลด เช่น `Std0202181IPFinal2026-main/backend` เมื่อแตก ZIP หรือ `Std0202181IPFinal2026/backend` เมื่อ clone
+3. ฝั่ง **Remote (ขวา)** สร้าง/เปิดโฟลเดอร์ชื่อ `Backend` เช่น `/app/Backend` (ตัว B ใหญ่)
+4. ลาก **ไฟล์และโฟลเดอร์ข้างใน `backend`** ไปไว้ใน `/app/Backend` โดยตรง ยกเว้น `.env`, `node_modules`, coverage และผลทดสอบ
 5. รอให้อัปโหลดเสร็จ ต้องเห็น `run.sh`, `package.json`, `package-lock.json`, `.env.example`, `src/`, `scripts/` และ `sql/` ในโฟลเดอร์ปลายทาง
 
 หากไม่เห็น `.env.example` ให้เปิดการแสดงไฟล์ซ่อนใน FileZilla ถ้าอัปเดตงานเดิมให้เก็บ `.env` ของเซิร์ฟเวอร์ไว้ และใช้โฟลเดอร์ของงานนี้โดยไม่ทับ `/app/run.sh` หรือ `/app/.env` ของงานอื่น
@@ -37,7 +39,7 @@ pwd
 ls
 cd /app
 ls
-cd tnpkhr-api
+cd Backend
 pwd
 ls -la
 ```
@@ -46,7 +48,7 @@ ls -la
 - `ls` แสดงไฟล์และโฟลเดอร์; `ls -la` แสดงไฟล์ซ่อนอย่าง `.env` ด้วย
 - `cd` ใช้เข้าโฟลเดอร์; `cd ..` ใช้ถอยกลับหนึ่งระดับ
 
-ตัวอย่างนี้ต้องได้ตำแหน่ง `/app/tnpkhr-api` และเห็น `run.sh` กับ `package.json` ถ้า Remote path ใน FileZilla ต่างจากตัวอย่าง ให้ใช้ path จริงนั้น เช่น `cd /home/YOUR_USER/tnpkhr-api` ถ้าเห็นโฟลเดอร์ `backend` อยู่ข้างในแทน ให้ `cd backend` แล้ว `ls -la` ก่อนรัน
+ตัวอย่างนี้ต้องได้ตำแหน่ง `/app/Backend` และเห็น `run.sh` กับ `package.json` ชื่อโฟลเดอร์บน Linux แยกตัวพิมพ์ใหญ่/เล็ก ให้ใช้ชื่อตรงกับฝั่ง Remote ใน FileZilla ถ้า Remote path ต่างจากตัวอย่าง ให้ใช้ path จริงนั้น เช่น `cd /home/YOUR_USER/Backend` ถ้าเห็นโฟลเดอร์ `backend` อยู่ข้างในแทน ให้ `cd backend` แล้ว `ls -la` ก่อนรัน
 
 ### 1.3 ตั้งค่า Backend ครั้งแรก
 
@@ -131,8 +133,8 @@ bash run.sh
 หยุดการรันแบบเดิมด้วย `Ctrl+C` ก่อน แล้วใช้ path จริงของโฟลเดอร์ที่อัปโหลด:
 
 ```bash
-cd /app/tnpkhr-api
-pm2 start /app/tnpkhr-api/run.sh --interpreter bash --name tnpkhr-ip-final
+cd /app/Backend
+pm2 start /app/Backend/run.sh --interpreter bash --name tnpkhr-ip-final
 pm2 logs tnpkhr-ip-final
 ```
 
