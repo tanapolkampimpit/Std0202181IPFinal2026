@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "BlueHR",
+    "slug": "bluehr-0202181",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bluehr.std0202181"
+    },
+    "android": {
+      "package": "com.bluehr.std0202181"
+    },
+    "web": {
+      "name": "BlueHR · Workforce Management"
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}

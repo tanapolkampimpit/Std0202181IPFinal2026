@@ -1,0 +1,30 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { once } from 'node:events';
+import { createApp } from '../../backend/src/app.js';
+import { createApi, ApiError } from '../src/services/client.js';
+
+test('frontend Fetch helper integrates with the real Express server over HTTP', async (t) => {
+  const server = createApp().listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  t.after(() => new Promise((resolve) => server.close(resolve)));
+  const baseUrl = `http://127.0.0.1:${server.address().port}/`;
+  const publicApi = createApi({ baseUrl });
+  await assert.rejects(() => publicApi('/api/employees'), (error) => error instanceof ApiError && error.status === 401);
+  await assert.rejects(() => publicApi('/api/login', { method: 'POST', body: { username: 'admin', password: 'wrong' } }), /Invalid username/);
+  const { token } = await publicApi('/api/login', { method: 'POST', body: { username: 'admin', password: 'password123' } });
+  const api = createApi({ baseUrl, token });
+  const before = await api('/api/employees');
+  const employee = await api('/api/employees', { method: 'POST', body: { name: 'Mobile Integration', position: 'QA Engineer', salary: 38000 } });
+  assert.equal((await api('/api/employees')).length, before.length + 1);
+  assert.equal((await api(`/api/employees/${employee.id}/status`, { method: 'PUT' })).status, 'On Leave');
+  const analysis = await api('/api/employees/salary-clusters');
+  assert.equal(analysis.clusters.length, 3);
+  assert.equal(analysis.clusters.reduce((sum, group) => sum + group.count, 0), before.length + 1);
+  await api(`/api/employees/${employee.id}`, { method: 'DELETE' });
+  assert.equal((await api('/api/employees')).length, before.length);
+  let signedOut = false;
+  const expired = createApi({ baseUrl, token: 'bad-token', onUnauthorized: () => { signedOut = true; } });
+  await assert.rejects(() => expired('/api/employees'), (error) => error.status === 401);
+  assert.equal(signedOut, true);
+});

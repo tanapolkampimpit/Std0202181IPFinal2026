@@ -1,0 +1,13 @@
+node_modules/
+.expo/
+dist/
+coverage/
+test-results/
+playwright-report/
+.env
+.env.local
+*.log
+.DS_Store
+Thumbs.db
+frontend/android/
+frontend/ios/
