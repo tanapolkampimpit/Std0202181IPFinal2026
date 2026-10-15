@@ -1,8 +1,8 @@
 import mysql from 'mysql2/promise';
 
 // Fixed, case-sensitive names from the existing phpMyAdmin schema.
-const EMPLOYEES = '`6730202181_Employees`';
-const USERS = '`6730202181_Users`';
+const EMPLOYEES = '`Thanapol_Kha_Employee`';
+const USERS = '`Thanapol_Kha_Users`';
 const employeeFields = '`id`, `name`, `position`, `status`, `salary`';
 const publicUserFields = '`user_id`, `username`, `role`, `created_at`';
 const validId = (id) => typeof id === 'string' && /^[1-9]\d{0,9}$/.test(id) && Number(id) <= 2147483647;
@@ -13,8 +13,8 @@ export function createPool(config) { return mysql.createPool(config); }
 
 export async function checkSchema(pool) {
   for (const [name, required, key] of [
-    ['6730202181_Employees', ['id', 'name', 'position', 'status', 'salary', 'created_at', 'updated_at'], 'id'],
-    ['6730202181_Users', ['user_id', 'username', 'password_hash', 'role', 'created_at'], 'user_id'],
+    ['Thanapol_Kha_Employee', ['id', 'name', 'position', 'status', 'salary', 'created_at', 'updated_at'], 'id'],
+    ['Thanapol_Kha_Users', ['user_id', 'username', 'password_hash', 'role', 'created_at'], 'user_id'],
   ]) {
     const [rows] = await pool.execute('SELECT COLUMN_NAME, EXTRA FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?', [name]);
     const missing = required.filter((column) => !rows.some((row) => row.COLUMN_NAME === column));

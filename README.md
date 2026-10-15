@@ -9,7 +9,7 @@ Repository: https://github.com/tanapolkampimpit/Std0202181IPFinal2026
 - `backend/`: persistent MySQL API, database login, employee/user CRUD, salary clustering and `run.sh`.
 - [Backend deployment guide](backend/README.md): configuration, FileZilla, endpoints and tests.
 
-The backend requires MySQL. It has no employee seed data, memory storage mode, fixed login or fixed bearer token. It reads the existing tables `6730202181_Employees` and `6730202181_Users` in `ip_std6730202181`. Starting the API does not create tables or insert users/employees.
+The backend requires MySQL. It has no employee seed data, memory storage mode, fixed login or fixed bearer token. It reads the existing tables `Thanapol_Kha_Employee` and `Thanapol_Kha_Users` in `ip_std6730202181`. Starting the API does not create tables or insert users/employees.
 
 ## Backend
 

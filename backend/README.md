@@ -1,6 +1,6 @@
 # BlueHR MySQL API — FileZilla deployment
 
-API นี้ใช้ตารางจริง `6730202181_Employees` และ `6730202181_Users` ในฐานข้อมูล `ip_std6730202181` ไม่มีข้อมูลพนักงานตัวอย่างหรือบัญชีล็อกอินตายตัว
+API นี้ใช้ตารางจริง `Thanapol_Kha_Employee` และ `Thanapol_Kha_Users` ในฐานข้อมูล `ip_std6730202181` ไม่มีข้อมูลพนักงานตัวอย่างหรือบัญชีล็อกอินตายตัว
 
 ## Config
 

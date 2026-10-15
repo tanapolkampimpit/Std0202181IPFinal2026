@@ -145,7 +145,7 @@ test('MySQL HTTP integration in a newly created disposable database', { timeout:
     assert.equal((await request(`/users/${admin.user_id}`, { method: 'PUT', body: { username: 'admin', role: 'User' } })).status, 409);
   });
   await t.test('PHP bcrypt $2y$ passwords are accepted', async () => {
-    await pool.execute('UPDATE `6730202181_Users` SET password_hash = ? WHERE user_id = ?', [passwordHash.replace(/^\$2[ab]\$/, '$2y$'), admin.user_id]);
+    await pool.execute('UPDATE `Thanapol_Kha_Users` SET password_hash = ? WHERE user_id = ?', [passwordHash.replace(/^\$2[ab]\$/, '$2y$'), admin.user_id]);
     const result = await request('/login', { method: 'POST', body: { username: 'admin', password: 'TestAdminPassword123!' } });
     assert.equal(result.status, 200);
     token = result.data.token;
