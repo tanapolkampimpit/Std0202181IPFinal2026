@@ -7,8 +7,8 @@ const passwordVersion = (hash) => createHash('sha256').update(hash).digest('hex'
 
 export function createDatabaseAuth(users, secret) {
   if (typeof secret !== 'string' || Buffer.byteLength(secret) < 32) throw new Error('A JWT secret of at least 32 bytes is required.');
-  const issuer = 'bluehr-ip-final';
-  const audience = 'bluehr-app';
+  const issuer = 'tnpkhr-ip-final';
+  const audience = 'tnpkhr-app';
   const dummyHash = bcrypt.hashSync('invalid-login-placeholder', 12);
   return {
     async login(username, password) {

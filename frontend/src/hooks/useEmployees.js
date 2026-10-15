@@ -49,6 +49,7 @@ export default function useEmployees(api) {
   return {
     employees, loading, busy, error, notice, reload,
     add: (value) => mutate('/api/employees', { method: 'POST', body: value }, (current, created) => [...current, created], 'Employee added successfully.'),
+    update: (employee, value) => mutate(`/api/employees/${encodeURIComponent(employee.id)}`, { method: 'PUT', body: value }, (current, updated) => current.map((item) => item.id === updated.id ? updated : item), 'Employee updated successfully.'),
     toggle: (employee) => mutate(`/api/employees/${encodeURIComponent(employee.id)}/status`, { method: 'PUT' }, (current, updated) => current.map((item) => item.id === updated.id ? updated : item), 'Employee status updated.'),
     remove: (employee) => mutate(`/api/employees/${encodeURIComponent(employee.id)}`, { method: 'DELETE' }, (current) => current.filter((item) => item.id !== employee.id), 'Employee deleted successfully.'),
   };

@@ -17,7 +17,7 @@ test('MySQL HTTP integration in a newly created disposable database', { timeout:
   if (!['127.0.0.1', 'localhost', '::1'].includes(host)) throw new Error('DB_TEST_HOST must be loopback; do not run these tests on the exam server.');
   const connectionConfig = { host, port: Number(process.env.DB_TEST_PORT ?? 3306), user: process.env.DB_TEST_USER ?? 'root', password: process.env.DB_TEST_PASSWORD ?? '' };
   const control = await mysql.createConnection(connectionConfig);
-  const database = `bluehr_test_${randomBytes(8).toString('hex')}`;
+  const database = `tnpkhr_test_${randomBytes(8).toString('hex')}`;
   await control.query(`CREATE DATABASE \`${database}\` CHARACTER SET utf8mb4`);
   const pool = createPool({ ...connectionConfig, database, connectionLimit: 5 });
   t.after(async () => {
@@ -41,7 +41,7 @@ test('MySQL HTTP integration in a newly created disposable database', { timeout:
   let token;
   async function request(path, { method = 'GET', body, bearer = token, raw } = {}) {
     const response = await fetch(`${base}/api${path}`, { method, headers: { 'Content-Type': 'application/json', ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}) }, ...(body !== undefined || raw ? { body: raw ?? JSON.stringify(body) } : {}) });
-    return { status: response.status, data: await response.json() };
+    return { status: response.status, headers: response.headers, data: await response.json() };
   }
 
   await t.test('health, database login, bad passwords, fake and expired JWTs', async () => {
@@ -53,14 +53,14 @@ test('MySQL HTTP integration in a newly created disposable database', { timeout:
     assert.equal(login.status, 200);
     token = login.data.token;
     assert.equal(jwt.verify(token, secret).sub, admin.user_id);
-    const expired = jwt.sign({ pwv: 'bad' }, secret, { subject: admin.user_id, issuer: 'bluehr-ip-final', audience: 'bluehr-app', expiresIn: -1 });
+    const expired = jwt.sign({ pwv: 'bad' }, secret, { subject: admin.user_id, issuer: 'tnpkhr-ip-final', audience: 'tnpkhr-app', expiresIn: -1 });
     assert.equal((await request('/employees', { bearer: expired })).status, 401);
   });
   await t.test('all employee and user operations require database authentication', async () => {
     for (const path of ['/employees', '/employees/1', '/employees/salary-clusters', '/users', '/users/1']) {
       assert.equal((await request(path, { bearer: '' })).status, 401);
     }
-    for (const [path, method] of [['/employees', 'POST'], ['/employees/1', 'PUT'], ['/employees/1/status', 'PUT'], ['/employees/1', 'DELETE'], ['/users', 'POST'], ['/users/1', 'PUT'], ['/users/1', 'DELETE']]) {
+    for (const [path, method] of [['/employees', 'POST'], ['/employees/1', 'PUT'], ['/employees/1', 'PATCH'], ['/employees/1/status', 'PUT'], ['/employees/1', 'DELETE'], ['/users', 'POST'], ['/users/1', 'PUT'], ['/users/1', 'DELETE']]) {
       assert.equal((await request(path, { method, body: {}, bearer: '' })).status, 401);
     }
   });
@@ -80,6 +80,23 @@ test('MySQL HTTP integration in a newly created disposable database', { timeout:
     assert.equal(updated.data.salary, 54321.09);
     assert.equal((await request(`/employees/${employee.id}/status`, { method: 'PUT' })).data.status, 'Active');
     assert.equal((await request(`/employees/${employee.id}`, { method: 'PUT', body: { name: 'Updated', position: 'Senior Engineer', salary: 54321.09 } })).status, 200);
+  });
+  await t.test('name-only edits persist in SQL; listing reads external SQL changes without caching', async () => {
+    const path = `/employees/${employee.id}`;
+    const before = (await request(path)).data;
+    const renamed = await request(path, { method: 'PATCH', body: { name: 'เปลี่ยนชื่อจริง' } });
+    assert.equal(renamed.status, 200);
+    assert.deepEqual(renamed.data, { ...before, name: 'เปลี่ยนชื่อจริง' });
+    const [rows] = await pool.execute('SELECT name FROM `Thanapol_Kha_Employee` WHERE id = ?', [employee.id]);
+    assert.equal(rows[0].name, 'เปลี่ยนชื่อจริง');
+    for (const body of [{}, { name: '' }, { salary: null }, { name: 'Invalid', id: '2' }]) {
+      assert.equal((await request(path, { method: 'PATCH', body })).status, 400);
+    }
+    assert.equal((await request('/employees/2147483647', { method: 'PATCH', body: { name: 'Missing' } })).status, 404);
+    await pool.execute('UPDATE `Thanapol_Kha_Employee` SET name = ? WHERE id = ?', ['Changed directly in SQL', employee.id]);
+    const list = await request('/employees');
+    assert.equal(list.data.find(({ id }) => id === employee.id).name, 'Changed directly in SQL');
+    assert.equal(list.headers.get('cache-control'), 'no-store');
   });
   await t.test('salary limits, text limits, malformed JSON, invalid IDs and SQL injection', async () => {
     for (const salary of [0, -1, '100', 0.001, 10000000000, null]) {
@@ -102,9 +119,24 @@ test('MySQL HTTP integration in a newly created disposable database', { timeout:
     assert.equal(analytics.status, 200);
     assert.equal(analytics.data.clusters.reduce((total, item) => total + item.count, 0), 1);
     assert.equal(analytics.data.clusters[0].centroid, 54321.09);
+      assert.deepEqual(analytics.data.clusters[0].salaries, [54321.09]);
+    for (const k of [1, 2, 4, 10]) {
+      const selected = await request(`/employees/salary-clusters?k=${k}`);
+      assert.equal(selected.status, 200);
+      assert.equal(selected.data.k, k);
+      assert.equal(selected.data.clusters.length, k);
+      assert.equal(selected.data.clusters.reduce((sum, group) => sum + group.count, 0), 1);
+        assert.deepEqual(selected.data.clusters.flatMap((group) => group.salaries), [54321.09]);
+    }
+    for (const invalid of ['0', '11', '-1', '2.5', 'abc', '', '3&k=4']) {
+      assert.equal((await request(`/employees/salary-clusters?k=${invalid}`)).status, 400);
+    }
     const added = await request('/employees', { method: 'POST', body: { name: 'Temporary', position: 'HR', salary: 9999999999.99 } });
     assert.equal(added.status, 201);
     assert.equal((await request(`/employees/${added.data.id}`, { method: 'DELETE' })).status, 200);
+    const [remaining] = await pool.execute('SELECT id FROM `Thanapol_Kha_Employee` WHERE id = ?', [added.data.id]);
+    assert.equal(remaining.length, 0, 'DELETE must physically remove the SQL row');
+    assert.equal((await request(`/employees/${added.data.id}`)).status, 404);
     assert.equal((await request(`/employees/${added.data.id}`, { method: 'DELETE' })).status, 404);
   });
 
@@ -161,7 +193,7 @@ test('MySQL HTTP integration in a newly created disposable database', { timeout:
     t.after(async () => { if (child.exitCode === null) { child.kill(); await closed; } });
     await new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('API child startup timed out')), 10000);
-      child.stdout.on('data', (data) => { if (data.toString().includes('BlueHR API listening')) { clearTimeout(timer); resolve(); } });
+      child.stdout.on('data', (data) => { if (data.toString().includes('TNPKHR API listening')) { clearTimeout(timer); resolve(); } });
       child.once('exit', () => { clearTimeout(timer); reject(new Error('API child exited before listening')); });
       child.once('error', (error) => { clearTimeout(timer); reject(error); });
     });

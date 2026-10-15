@@ -59,7 +59,7 @@ export function createEmployeeStore(pool) {
       return transaction(pool, async (connection) => {
         const current = await getWith(connection, id, true);
         if (!current) return null;
-        await connection.execute(`UPDATE ${EMPLOYEES} SET name = ?, position = ?, salary = ?, status = ? WHERE id = ?`, [data.name, data.position, data.salary, data.status ?? current.status, id]);
+        await connection.execute(`UPDATE ${EMPLOYEES} SET name = ?, position = ?, salary = ?, status = ? WHERE id = ?`, [data.name ?? current.name, data.position ?? current.position, data.salary ?? current.salary, data.status ?? current.status, id]);
         return getWith(connection, id);
       });
     },

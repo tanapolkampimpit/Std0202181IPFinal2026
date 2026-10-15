@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApi, ApiError } from '../src/services/client.js';
 
-const { BLUEHR_TEST_API_URL: baseUrl, BLUEHR_TEST_USERNAME: username, BLUEHR_TEST_PASSWORD: password } = process.env;
-test('frontend Fetch helper integrates with the running MySQL API', { skip: !baseUrl || !username || !password ? 'Set BLUEHR_TEST_API_URL, BLUEHR_TEST_USERNAME and BLUEHR_TEST_PASSWORD for a disposable test environment.' : false }, async (t) => {
+const { TNPKHR_TEST_API_URL: baseUrl, TNPKHR_TEST_USERNAME: username, TNPKHR_TEST_PASSWORD: password } = process.env;
+test('frontend Fetch helper integrates with the running MySQL API', { skip: !baseUrl || !username || !password ? 'Set TNPKHR_TEST_API_URL, TNPKHR_TEST_USERNAME and TNPKHR_TEST_PASSWORD for a disposable test environment.' : false }, async (t) => {
   const publicApi = createApi({ baseUrl });
   await assert.rejects(() => publicApi('/api/employees'), (error) => error instanceof ApiError && error.status === 401);
   await assert.rejects(() => publicApi('/api/login', { method: 'POST', body: { username, password: 'wrong' } }), /Invalid username/);
@@ -14,6 +14,9 @@ test('frontend Fetch helper integrates with the running MySQL API', { skip: !bas
   let removed = false;
   t.after(async () => { if (!removed) await api(`/api/employees/${employee.id}`, { method: 'DELETE' }); });
   assert.equal((await api('/api/employees')).length, before.length + 1);
+  const updated = await api(`/api/employees/${employee.id}`, { method: 'PUT', body: { name: 'เปลี่ยนชื่อจากแอป', position: employee.position, salary: employee.salary } });
+  assert.equal(updated.name, 'เปลี่ยนชื่อจากแอป');
+  assert.equal((await api(`/api/employees/${employee.id}`)).name, updated.name);
   assert.equal((await api(`/api/employees/${employee.id}/status`, { method: 'PUT' })).status, 'On Leave');
   const analysis = await api('/api/employees/salary-clusters');
   assert.equal(analysis.clusters.length, 3);

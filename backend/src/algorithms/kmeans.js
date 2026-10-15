@@ -6,17 +6,18 @@ function mean(values) {
   return Math.min(1, values.reduce((sum, value) => sum + value / scale / values.length, 0)) * scale;
 }
 
-export function kMeans1D(salaries, { maxIterations = 100, tolerance = 1e-10 } = {}) {
+export function kMeans1D(salaries, { k: requestedK = 3, maxIterations = 100, tolerance = 1e-10 } = {}) {
   if (!Array.isArray(salaries) || salaries.some((value) => typeof value !== 'number' || !Number.isFinite(value) || value <= 0)) {
     throw new TypeError('Salaries must be an array of positive finite numbers.');
   }
   if (!Number.isInteger(maxIterations) || maxIterations < 1 || !Number.isFinite(tolerance) || tolerance < 0) {
     throw new TypeError('Invalid K-Means iteration options.');
   }
+  if (!Number.isInteger(requestedK) || requestedK < 1 || requestedK > 10) throw new TypeError('K must be an integer between 1 and 10.');
   const sorted = [...salaries].sort((a, b) => a - b);
   const unique = [...new Set(sorted)];
-  const k = Math.min(3, unique.length);
-  if (k === 0) return Array.from({ length: 3 }, () => ({ centroid: null, count: 0, values: [] }));
+  const k = Math.min(requestedK, unique.length);
+  if (k === 0) return Array.from({ length: requestedK }, () => ({ centroid: null, count: 0, values: [] }));
 
   // Quantiles of distinct observed salaries give reproducible starting points.
   let centroids = Array.from({ length: k }, (_, i) => unique[Math.round(i * (unique.length - 1) / Math.max(1, k - 1))]);
@@ -38,14 +39,15 @@ export function kMeans1D(salaries, { maxIterations = 100, tolerance = 1e-10 } = 
     if (converged) break;
   }
   const result = groups.map((values) => ({ centroid: values.length ? mean(values) : null, count: values.length, values }));
-  while (result.length < 3) result.push({ centroid: null, count: 0, values: [] });
+  while (result.length < requestedK) result.push({ centroid: null, count: 0, values: [] });
   return result.sort((a, b) => a.centroid === null ? (b.centroid === null ? 0 : 1) : b.centroid === null ? -1 : a.centroid - b.centroid);
 }
 
-export function salaryClusters(salaries) {
-  return kMeans1D(salaries).map(({ centroid, count }, index) => ({
+export function salaryClusters(salaries, { includeSalaries = false, ...options } = {}) {
+  return kMeans1D(salaries, options).map(({ centroid, count, values }, index) => ({
     group: `Tier ${index + 1}`,
     centroid: centroid === null ? null : Number(centroid.toFixed(2)),
     count,
+    ...(includeSalaries ? { salaries: values } : {}),
   }));
 }

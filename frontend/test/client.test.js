@@ -3,7 +3,7 @@ import { createApi, ApiError } from '../src/services/client';
 afterEach(() => jest.restoreAllMocks());
 test('network failure produces a useful error with API address', async () => {
   global.fetch = jest.fn().mockRejectedValue(new TypeError('Network request failed'));
-  await expect(createApi({ baseUrl: 'http://10.0.2.2:3000' })('/api/employees')).rejects.toThrow('Cannot reach BlueHR at http://10.0.2.2:3000');
+  await expect(createApi({ baseUrl: 'http://10.0.2.2:3000' })('/api/employees')).rejects.toThrow('Cannot reach TNPKHR at http://10.0.2.2:3000');
 });
 test('invalid JSON is reported clearly', async () => {
   global.fetch = jest.fn().mockResolvedValue({ status: 502, ok: false, text: async () => '<html>bad gateway</html>' });

@@ -1,15 +1,25 @@
-export function employeeInput(body, { update = false } = {}) {
+export function employeeInput(body, { update = false, partial = false } = {}) {
   const errors = {};
   const data = {};
+  const has = (field) => Object.prototype.hasOwnProperty.call(body ?? {}, field);
+  if (partial) {
+    const allowed = ['name', 'position', 'salary', 'status'];
+    if (!body || typeof body !== 'object' || Array.isArray(body) || !allowed.some(has) || Object.keys(body).some((field) => !allowed.includes(field))) {
+      errors.body = 'Provide one or more of name, position, salary or status only.';
+    }
+  }
   for (const field of ['name', 'position']) {
+    if (partial && !has(field)) continue;
     if (typeof body?.[field] !== 'string' || !body[field].trim() || [...body[field].trim()].length > 100) {
       errors[field] = `${field} must contain 1–100 characters.`;
     } else data[field] = body[field].trim();
   }
-  const salary = body?.salary;
-  if (typeof salary !== 'number' || !Number.isFinite(salary) || salary <= 0 || salary > 9999999999.99 || Number(salary.toFixed(2)) !== salary) {
-    errors.salary = 'Salary must be a positive number up to 9999999999.99 with at most two decimal places.';
-  } else data.salary = salary;
+  if (!partial || has('salary')) {
+    const salary = body?.salary;
+    if (typeof salary !== 'number' || !Number.isFinite(salary) || salary <= 0 || salary > 9999999999.99 || Number(salary.toFixed(2)) !== salary) {
+      errors.salary = 'Salary must be a positive number up to 9999999999.99 with at most two decimal places.';
+    } else data.salary = salary;
+  }
   if (update && body?.status !== undefined) {
     if (!['Active', 'On Leave'].includes(body.status)) errors.status = 'Status must be Active or On Leave.';
     else data.status = body.status;

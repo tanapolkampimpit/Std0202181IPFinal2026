@@ -9,6 +9,10 @@ export function createApp({ store, auth, users, corsOrigin = '*' } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.use(cors({ origin: corsOrigin }));
+  app.use('/api', (_req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+  });
   app.use(express.json({ limit: '32kb' }));
 
   app.get('/api/health', async (_req, res) => {
@@ -23,9 +27,14 @@ export function createApp({ store, auth, users, corsOrigin = '*' } = {}) {
   app.use('/api/employees', auth.middleware);
 
   // Static analytics path is deliberately registered before dynamic ID paths.
-  app.get('/api/employees/salary-clusters', async (_req, res) => {
+  app.get('/api/employees/salary-clusters', async (req, res) => {
+    const rawK = req.query.k;
+    if (rawK !== undefined && (typeof rawK !== 'string' || !/^(?:[1-9]|10)$/.test(rawK))) {
+      return res.status(400).json({ success: false, error: 'K must be an integer between 1 and 10.' });
+    }
+    const k = rawK === undefined ? 3 : Number(rawK);
     const employees = await store.list();
-    res.json({ success: true, clusters: salaryClusters(employees.map(({ salary }) => salary)) });
+    res.json({ success: true, k, clusters: salaryClusters(employees.map(({ salary }) => salary), { k, includeSalaries: true }) });
   });
 
   app.get('/api/employees', async (_req, res) => res.json(await store.list()));
@@ -47,13 +56,15 @@ export function createApp({ store, auth, users, corsOrigin = '*' } = {}) {
     return res.json(employee);
   });
 
-  app.put('/api/employees/:id', async (req, res) => {
-    const { data, errors } = employeeInput(req.body, { update: true });
+  const updateEmployee = async (req, res) => {
+    const { data, errors } = employeeInput(req.body, { update: true, partial: req.method === 'PATCH' });
     if (Object.keys(errors).length) return res.status(400).json({ success: false, error: 'Please check the employee details.', errors });
     const item = await store.update(req.params.id, data);
     if (!item) return res.status(404).json({ success: false, error: 'Employee not found.' });
     res.json(item);
-  });
+  };
+  app.put('/api/employees/:id', updateEmployee);
+  app.patch('/api/employees/:id', updateEmployee);
   app.delete('/api/employees/:id', async (req, res) => {
     if (!await store.remove(req.params.id)) return res.status(404).json({ success: false, error: 'Employee not found.' });
     return res.json({ success: true, message: 'Employee deleted.' });

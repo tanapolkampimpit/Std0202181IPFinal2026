@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Modal, Platform, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Modal, Platform, RefreshControl, StyleSheet, View } from 'react-native';
+import { Text, TextInput } from '../components/Typography';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Button, Feedback, Icon, IconButton, ui } from '../components/ui';
 import AppHeader from '../components/AppHeader';
@@ -12,8 +13,9 @@ import useEmployees from '../hooks/useEmployees';
 
 export default function DashboardScreen({ onAnalyze, directoryOnly = false, onHome }) {
   const { api, username } = useAuth();
-  const { employees, loading, busy, error, notice, reload, add, toggle, remove } = useEmployees(api);
+  const { employees, loading, busy, error, notice, reload, add, update, toggle, remove } = useEmployees(api);
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState(null);
   const [query, setQuery] = useState('');
   const [webDelete, setWebDelete] = useState(null);
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -23,7 +25,7 @@ export default function DashboardScreen({ onAnalyze, directoryOnly = false, onHo
   const refresh = () => reload().catch(() => {});
   function confirmDelete(employee) {
     if (Platform.OS === 'web') { setWebDelete(employee); return; }
-    Alert.alert('Delete employee?', `Remove ${employee.name} from your team? This also updates salary analytics.`, [
+    Alert.alert('Delete employee?', `Permanently delete ${employee.name}? This cannot be undone and also updates salary analytics.`, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: () => remove(employee).catch(() => {}) },
     ]);
@@ -52,7 +54,7 @@ export default function DashboardScreen({ onAnalyze, directoryOnly = false, onHo
   return <View style={ui.page}>
     <AppHeader onHome={onHome} onRefresh={refresh} refreshing={loading || busy} />
     <FlatList data={filtered} keyExtractor={({ id }) => id} ListHeaderComponent={header} contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled"
-      renderItem={({ item, index }) => <EmployeeCard employee={item} index={index} busy={busy || loading} onToggle={(employee) => toggle(employee).catch(() => {})} onDelete={confirmDelete} />}
+      renderItem={({ item, index }) => <EmployeeCard employee={item} index={index} busy={busy || loading} onEdit={setEditing} onToggle={(employee) => toggle(employee).catch(() => {})} onDelete={confirmDelete} />}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       refreshControl={<RefreshControl refreshing={loading} onRefresh={() => !busy && refresh()} tintColor={colors.primary} enabled={!busy} />}
       ListEmptyComponent={loading ? <View style={styles.empty}><ActivityIndicator size="large" color={colors.primary} /><Text style={ui.body}>Loading your team…</Text></View> : !error ? <View style={styles.empty}><Icon name={query.trim() ? 'search-outline' : 'people-outline'} size={34} />
@@ -61,10 +63,11 @@ export default function DashboardScreen({ onAnalyze, directoryOnly = false, onHo
       </View> : null}
       ListFooterComponent={<View style={styles.footer}><Text style={styles.footnote}>{hasLoaded ? `${filtered.length} of ${employees.length} employees shown` : 'Employee directory'}</Text><Button title="Analyze Salary Structure" icon="stats-chart-outline" variant="secondary" onPress={onAnalyze} disabled={busy} style={styles.analyze} /></View>} />
     {adding && <AddEmployeeModal visible onClose={() => setAdding(false)} onSave={async (data) => { await add(data); setQuery(''); }} busy={busy} />}
+    {editing && <AddEmployeeModal key={editing.id} visible employee={editing} onClose={() => setEditing(null)} onSave={async (data) => { await update(editing, data); setQuery(''); }} busy={busy} />}
     <Modal visible={!!webDelete} transparent animationType="fade" onRequestClose={() => setWebDelete(null)}>
       <View style={styles.overlay}><View style={styles.dialog} accessibilityViewIsModal role="dialog" aria-modal={true} aria-label="Delete employee">
         <View style={styles.dangerIcon}><Icon name="trash-outline" color={colors.danger} size={24} /></View>
-        <Text accessibilityRole="header" style={ui.heading}>Delete employee?</Text><Text style={ui.body}>Remove {webDelete?.name} from your team? This also updates salary analytics.</Text>
+        <Text accessibilityRole="header" style={ui.heading}>Delete employee?</Text><Text style={ui.body}>Permanently delete {webDelete?.name}? This cannot be undone and also updates salary analytics.</Text>
         <View style={styles.dialogActions}><Button title="Cancel" variant="secondary" onPress={() => setWebDelete(null)} style={styles.flex} /><Button title="Delete" variant="danger" style={styles.flex} onPress={() => { const employee = webDelete; setWebDelete(null); remove(employee).catch(() => {}); }} /></View>
       </View></View>
     </Modal>
@@ -77,7 +80,7 @@ const styles = StyleSheet.create({
   date: { flexDirection: 'row', gap: 7, alignItems: 'center', marginTop: 12 }, dateText: { fontSize: 10, color: colors.onPrimary },
   briefcase: { position: 'absolute', width: 115, height: 115, right: -20, bottom: -27, borderRadius: 58, backgroundColor: 'rgba(164,238,213,0.22)', padding: 25 },
   flex: { flex: 1 }, listHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 2 },
-  subtitle: { fontSize: 11, color: colors.muted, marginTop: 4 }, addButton: { paddingHorizontal: 12, minHeight: 42, borderRadius: 11 },
+  subtitle: { fontSize: 13, color: colors.muted, marginTop: 4 }, addButton: { paddingHorizontal: 12, minHeight: 44, borderRadius: 11 },
   searchRow: { flexDirection: 'row', gap: 9 }, searchBox: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, borderRadius: 11, backgroundColor: '#EDF4F1' },
   searchInput: { minWidth: 0, flex: 1, color: colors.text, fontSize: 12, minHeight: 44, paddingVertical: 10, outlineWidth: 0 }, clearButton: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
   separator: { height: 5 }, footer: { gap: 16, paddingTop: 14 }, footnote: { textAlign: 'center', color: colors.muted, fontSize: 10 }, analyze: { borderRadius: 99 },

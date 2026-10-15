@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const source = fileURLToPath(new URL('..', import.meta.url));
-const destination = path.resolve(process.argv[2] ?? path.join(source, '..', '..', 'BlueHR_API_FileZilla'));
+const destination = path.resolve(process.argv[2] ?? path.join(source, '..', '..', 'TNPKHR_API_FileZilla'));
 const relative = path.relative(source, destination);
 if (!relative || (!relative.startsWith('..' + path.sep) && relative !== '..' && !path.isAbsolute(relative))) throw new Error('Choose an output folder outside backend.');
 let exists = true;

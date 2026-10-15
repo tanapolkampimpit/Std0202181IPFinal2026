@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text as NativeText, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { colors, fonts } from '../theme';
+import { Text, TextInput } from './Typography';
 
 export function Icon({ name, size = 20, color = colors.primary }) {
   return <Ionicons name={name} size={size} color={color} accessible={false} />;
@@ -45,7 +46,7 @@ export function Feedback({ message, retry, success = false }) {
 export function Brand({ light = false, large = false }) {
   return <View style={styles.brand}>
     {large && <Icon name="people-outline" size={50} color={light ? colors.mint : colors.primary} />}
-    <View><Text accessibilityRole={large ? 'header' : undefined} style={[styles.brandText, light && { color: colors.surface }, large && styles.brandLarge]}>Blue<Text style={{ color: light ? colors.mint : colors.teal }}>HR</Text></Text>
+    <View><NativeText testID="tnpkhr-logo" accessibilityRole={large ? 'header' : undefined} style={[styles.brandText, light && { color: colors.surface }, large && styles.brandLarge]}>TNPK<NativeText style={{ color: light ? colors.mint : colors.teal }}>HR</NativeText></NativeText>
       {large && <Text style={styles.brandCaption}>HR Manager & Salary Analytics</Text>}
     </View>
   </View>;
@@ -55,23 +56,23 @@ export const ui = StyleSheet.create({
   content: { width: '100%', maxWidth: 760, alignSelf: 'center', padding: 16, gap: 16 },
   heading: { fontFamily: fonts.body, fontSize: 24, fontWeight: '800', color: colors.text, letterSpacing: -0.6 },
   title: { fontFamily: fonts.body, fontSize: 18, fontWeight: '700', color: colors.text, letterSpacing: -0.4 },
-  body: { fontFamily: fonts.body, fontSize: 13, lineHeight: 20, color: colors.muted },
+  body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 24, color: colors.muted },
   eyebrow: { fontFamily: fonts.body, fontSize: 11, fontWeight: '700', letterSpacing: 1.5, color: colors.muted },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
 });
 const styles = StyleSheet.create({
   button: { minHeight: 46, borderRadius: 12, paddingVertical: 11, paddingHorizontal: 16, flexDirection: 'row', gap: 8, justifyContent: 'center', alignItems: 'center' },
   primary: { backgroundColor: colors.primary }, secondary: { backgroundColor: colors.mist }, danger: { backgroundColor: colors.dangerTint },
-  buttonText: { fontFamily: fonts.body, fontSize: 13, fontWeight: '700', flexShrink: 1 },
+  buttonText: { fontFamily: fonts.body, fontSize: 14, fontWeight: '600', flexShrink: 1, textAlign: 'center' },
   iconButton: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
   focused: { borderColor: colors.teal, outlineColor: colors.teal, outlineWidth: 2, outlineOffset: 2 },
   pressed: { opacity: 0.7 }, disabled: { opacity: 0.5 },
-  field: { gap: 7 }, label: { fontFamily: fonts.body, color: colors.text, fontSize: 12, fontWeight: '600' },
+  field: { gap: 7 }, label: { fontFamily: fonts.body, color: colors.text, fontSize: 13, fontWeight: '600' },
   input: { fontFamily: fonts.body, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 11, minHeight: 48, paddingHorizontal: 13, paddingVertical: 12, color: colors.text, fontSize: 14 },
   invalid: { borderColor: colors.danger }, fieldError: { fontSize: 12, color: colors.danger, lineHeight: 18 },
   feedback: { padding: 12, borderRadius: 12, backgroundColor: colors.dangerTint, gap: 8 }, feedbackSuccess: { backgroundColor: colors.successTint },
   feedbackRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 }, feedbackText: { flex: 1, color: colors.danger, fontSize: 12, lineHeight: 19 }, retry: { alignSelf: 'flex-start' },
   brand: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  brandText: { fontFamily: fonts.body, color: colors.text, fontSize: 24, fontWeight: '800', letterSpacing: -1 },
-  brandLarge: { fontSize: 43, letterSpacing: -2 }, brandCaption: { fontFamily: fonts.body, fontSize: 10, color: colors.onPrimary, marginTop: 3 },
+  brandText: { fontFamily: fonts.logo, color: colors.text, fontSize: 24, fontWeight: '800', letterSpacing: -1 },
+  brandLarge: { fontSize: 43, letterSpacing: -2 }, brandCaption: { fontFamily: fonts.body, fontSize: 12, color: colors.onPrimary, marginTop: 3 },
 });

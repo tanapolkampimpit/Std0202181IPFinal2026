@@ -11,7 +11,7 @@ try {
   const users = createUserStore(pool);
   const app = createApp({ corsOrigin: config.corsOrigin, users, store: createEmployeeStore(pool), auth: createDatabaseAuth(users, config.jwtSecret) });
   const server = app.listen(config.port, config.host, () => {
-    console.log(`BlueHR API listening on ${config.host}:${config.port} (mysql)`);
+    console.log(`TNPKHR API listening on ${config.host}:${config.port} (mysql)`);
   });
   server.on('error', async (error) => {
     console.error(`Unable to listen: ${error.code ?? error.name}`);

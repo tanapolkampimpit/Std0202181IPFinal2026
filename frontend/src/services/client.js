@@ -32,7 +32,7 @@ export function createApi({ baseUrl, token, onUnauthorized, timeout = 15000 }) {
     } catch (error) {
       if (error instanceof ApiError) throw error;
       if (error.name === 'AbortError') throw new ApiError('The request took too long. Check your connection and try again.');
-      throw new ApiError(`Cannot reach BlueHR at ${base}. Check that the server is running and your network address is correct.`);
+      throw new ApiError(`Cannot reach TNPKHR at ${base}. Check that the server is running and your network address is correct.`);
     } finally { clearTimeout(timer); }
   };
 }

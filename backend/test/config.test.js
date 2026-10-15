@@ -38,3 +38,13 @@ test('user validation enforces bcrypt byte limits and explicit roles', () => {
   assert.ok(userInput({ username: 'test', password: '12345678', role: 'Owner' }).errors.role);
   assert.deepEqual(userInput({ username: 'test' }, { update: true }), { data: { username: 'test' }, errors: {} });
 });
+
+test('partial employee edits accept a name alone and reject empty or invalid changes', () => {
+  const options = { update: true, partial: true };
+  assert.deepEqual(employeeInput({ name: ' ชื่อใหม่ ' }, options), { data: { name: 'ชื่อใหม่' }, errors: {} });
+  assert.deepEqual(employeeInput({ status: 'On Leave' }, options), { data: { status: 'On Leave' }, errors: {} });
+  for (const body of [{}, null, [], { id: '2' }, { name: '' }, { name: null }, { salary: null }, { salary: '100' }, { status: 'Deleted' }, { name: 'Valid', id: '2' }]) {
+    assert.ok(Object.keys(employeeInput(body, options).errors).length, JSON.stringify(body));
+  }
+  assert.ok(employeeInput({ name: 'Name only' }, { update: true }).errors.salary);
+});

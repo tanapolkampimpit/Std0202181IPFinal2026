@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 let createdId;
-const apiBase = process.env.BLUEHR_TEST_API_URL ?? 'http://localhost:3000';
-const username = process.env.BLUEHR_TEST_USERNAME;
-const password = process.env.BLUEHR_TEST_PASSWORD;
+const apiBase = process.env.TNPKHR_TEST_API_URL ?? 'http://localhost:3000';
+const username = process.env.TNPKHR_TEST_USERNAME;
+const password = process.env.TNPKHR_TEST_PASSWORD;
 let headers;
-test.skip(!username || !password, 'Set BLUEHR_TEST_USERNAME and BLUEHR_TEST_PASSWORD for a disposable database environment.');
+test.skip(!username || !password, 'Set TNPKHR_TEST_USERNAME and TNPKHR_TEST_PASSWORD for a disposable database environment.');
 test.afterEach(async ({ request }) => {
   if (createdId) await request.delete(`${apiBase}/api/employees/${createdId}`, { headers });
   createdId = undefined;

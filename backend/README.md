@@ -1,6 +1,8 @@
-# BlueHR MySQL API — FileZilla deployment
+# TNPKHR MySQL API — FileZilla deployment
 
 API นี้ใช้ตารางจริง `Thanapol_Kha_Employee` และ `Thanapol_Kha_Users` ในฐานข้อมูล `ip_std6730202181` ไม่มีข้อมูลพนักงานตัวอย่างหรือบัญชีล็อกอินตายตัว
+
+คู่มือเริ่มจากรัน Frontend จนถึงอัปโหลดด้วย FileZilla อยู่ใน [README หลัก](../README.md) หากอ่านไฟล์นี้จากชุดอัปโหลด ให้เปิดคู่มือที่ [GitHub](https://github.com/tanapolkampimpit/Std0202181IPFinal2026#readme) คำสั่งรัน Backend บนเซิร์ฟเวอร์คือ `cd /app/tnpkhr-api` แล้ว `bash run.sh` โดยเปลี่ยน path ให้ตรงกับโฟลเดอร์ที่อัปโหลดจริง
 
 ## Config
 
@@ -8,7 +10,7 @@ API นี้ใช้ตารางจริง `Thanapol_Kha_Employee` แล
 
 ```dotenv
 APP_HOST=0.0.0.0
-APP_PORT=3000
+APP_PORT=3019
 DB_HOST=YOUR_MYSQL_HOST
 DB_PORT=3306
 DB_NAME=ip_std6730202181
@@ -33,31 +35,35 @@ npm start
 
 ## FileZilla + run.sh
 
-สร้างโฟลเดอร์สำหรับอัปโหลดจาก source ปัจจุบันได้ด้วย `npm run package:filezilla` จะได้ `BlueHR_API_FileZilla` ข้างโฟลเดอร์ repository โดยไม่คัดลอก `.env` หรือ `node_modules` หากโฟลเดอร์ปลายทางมีอยู่แล้ว ให้ระบุชื่อใหม่: `npm run package:filezilla -- /path/to/new-folder`
+เปิด Terminal ที่ `backend/` แล้วสร้างโฟลเดอร์สำหรับอัปโหลดจาก source ปัจจุบันด้วย `npm run package:filezilla -- ../../TNPKHR_API_FileZilla_upload` จะได้ `TNPKHR_API_FileZilla_upload` ข้างโฟลเดอร์ repository โดยไม่คัดลอก `.env` หรือ `node_modules` หากโฟลเดอร์ปลายทางมีอยู่แล้ว ให้ระบุชื่อใหม่ สคริปต์ไม่ทับไฟล์เดิม หากไม่ระบุปลายทางจะใช้ชื่อ `TNPKHR_API_FileZilla`
 
-1. สร้างโฟลเดอร์ใหม่ เช่น `/app/bluehr-api` บนเซิร์ฟเวอร์ แล้วอัปโหลดไฟล์ backend เข้าไปทั้งหมด ยกเว้น `.env`, `node_modules`, coverage และผลทดสอบ ไม่ทับ `/app/run.sh` หรือ `.env` ของงานอื่น
+1. สร้างโฟลเดอร์ใหม่ เช่น `/app/tnpkhr-api` บนเซิร์ฟเวอร์ แล้วอัปโหลดไฟล์ข้างในชุดอัปโหลดเข้าไปโดยตรง ให้ `run.sh` อยู่ที่ `/app/tnpkhr-api/run.sh` ยกเว้น `.env`, `node_modules`, coverage และผลทดสอบ ไม่ทับ `/app/run.sh` หรือ `.env` ของงานอื่น FileZilla ใช้โอนไฟล์ ส่วนการรันใช้ SSH/Terminal
 2. เปิด SSH/Terminal แล้วเข้าโฟลเดอร์ใหม่
 3. ถ้ามี `.env` ที่ตั้งค่าแล้ว ให้วางไว้ในโฟลเดอร์ใหม่นี้ด้วยตนเอง หากยังไม่มี รันครั้งแรกจะสร้างจาก `.env.example` พร้อม JWT secret สุ่ม แล้วหยุดให้กรอกข้อมูล MySQL
 
 ```bash
-cd /app/bluehr-api
+cd /app/tnpkhr-api
 bash run.sh
-# ตั้งค่า .env สำหรับเซิร์ฟเวอร์เมื่อเป็นการติดตั้งใหม่ แล้วตรวจการเชื่อมต่อ
+# หากเพิ่งสร้าง .env สคริปต์จะหยุด ให้แก้ข้อมูล DB และ APP_PORT=3019 ก่อน
+nano .env
+# เก็บ JWT_SECRET ที่สร้างไว้ แล้วตรวจการเชื่อมต่อ
 bash run.sh check
-# สร้างบัญชีเมื่อจำเป็นเท่านั้น รหัสผ่านจะให้กรอกแบบซ่อนและยืนยันซ้ำ
-bash run.sh create-admin admin
 # เริ่ม API
 bash run.sh
 ```
 
+ถ้ายังไม่มีบัญชีจึงค่อยใช้ `bash run.sh create-admin admin` แล้วกรอกรหัสผ่านแบบซ่อนและยืนยันซ้ำ หากมีบัญชีจริงอยู่แล้วให้ข้ามขั้นตอนนี้ ตรวจ API ใน SSH อีกหน้าด้วย `curl http://127.0.0.1:3019/api/health` และตรวจจากเครื่องตัวเองด้วย URL `http://119.59.102.161:3019/api/health` ควรได้ HTTP 200 เมื่อฐานข้อมูลพร้อม URL นี้เป็นค่าที่ตั้งไว้ของงาน ไม่ใช่ผลยืนยันว่าเซิร์ฟเวอร์กำลังออนไลน์
+
 `create-admin` เพิ่มบัญชีใหม่ ไม่เปลี่ยนรหัสผ่านบัญชีที่มีอยู่แล้ว API ไม่สร้างบัญชีอัตโนมัติ ไม่รีเซ็ตตาราง และไม่เพิ่มพนักงานอัตโนมัติ
 
-`bash run.sh` รันแบบ foreground หากเซิร์ฟเวอร์มี PM2 และต้องการให้ทำงานต่อหลังปิด SSH ใช้ชื่อ process ใหม่ที่ไม่ทับงานเดิม:
+`bash run.sh` รันแบบ foreground หากเซิร์ฟเวอร์มี PM2 และต้องการให้ทำงานต่อหลังปิด SSH ให้หยุด foreground ด้วย `Ctrl+C` ก่อน แล้วใช้ชื่อ process ใหม่ที่ไม่ทับงานเดิม:
 
 ```bash
-pm2 start /app/bluehr-api/run.sh --interpreter bash --name bluehr-ip-final
-pm2 logs bluehr-ip-final
+pm2 start /app/tnpkhr-api/run.sh --interpreter bash --name tnpkhr-ip-final
+pm2 logs tnpkhr-ip-final
 ```
+
+เมื่ออัปโหลด source รุ่นใหม่ ให้ใช้ `pm2 restart tnpkhr-ip-final` แล้วตรวจ health อีกครั้ง หากต้องการให้เริ่มเองหลัง reboot ให้ตั้ง startup ตามระบบของ hosting
 
 ใช้พอร์ตที่ hosting กำหนดใน `APP_PORT` และชี้ reverse proxy มายังพอร์ตนั้นตามระบบของผู้ให้บริการ ไม่จำเป็นต้องเปิด API เป็นพอร์ตสาธารณะโดยตรง
 
@@ -69,10 +75,13 @@ pm2 logs bluehr-ip-final
 | POST | `/api/login` | `{username,password}` จาก Users → `{success:true,token}` |
 | GET / POST | `/api/employees` | อ่านทั้งหมด / เพิ่ม |
 | GET / PUT / DELETE | `/api/employees/:id` | อ่านหนึ่ง / แก้ไข / ลบ |
+| PATCH | `/api/employees/:id` | แก้ไขเฉพาะฟิลด์ เช่น `{ "name": "ชื่อใหม่" }` |
 | PUT | `/api/employees/:id/status` | สลับ Active / On Leave |
-| GET | `/api/employees/salary-clusters` | K-Means 3 กลุ่มจากเงินเดือนปัจจุบัน |
+| GET | `/api/employees/salary-clusters?k=3` | K-Means ตามค่า K ที่เลือก 1–10 กลุ่ม (เริ่มต้น 3) จากเงินเดือนปัจจุบัน |
 | GET / POST | `/api/users` | อ่านทั้งหมด / เพิ่ม — Admin เท่านั้น |
 | GET / PUT / DELETE | `/api/users/:id` | อ่านหนึ่ง / แก้ไข / ลบ — Admin เท่านั้น |
+
+ผลลัพธ์แต่ละกลุ่มมี `group`, `centroid`, `count` และ `salaries` (เงินเดือนสมาชิกจริงในกลุ่มนั้น) เพื่อให้กราฟค่าเฉลี่ย สัดส่วน ช่วงเงินเดือน และ Scatter ใช้ผล K-Means ชุดเดียวกัน ควรอัปเดต Backend พร้อม Frontend สำหรับกราฟทั้งสี่
 
 ทุก endpoint ยกเว้น login/health ต้องส่ง `Authorization: Bearer <token>` ที่ได้จาก login Token มีอายุ 8 ชั่วโมง ตรวจสิทธิ์จาก DB ปัจจุบันทุก request และยกเลิก session เมื่อเปลี่ยนรหัสผ่านหรือลบบัญชี
 
@@ -83,6 +92,8 @@ pm2 logs bluehr-ip-final
 ```
 
 PUT อนุญาต `status` เพิ่มเติม (`Active` หรือ `On Leave`) ต้องส่ง name/position/salary ครบ ไม่รับ id จาก client ตอนเพิ่ม ข้อมูลที่เพิ่มจะใช้ AUTO_INCREMENT ของ MySQL
+
+หากเปลี่ยนเฉพาะชื่อ ใช้ `PATCH /api/employees/:id` พร้อม `{ "name": "ชื่อใหม่" }` โดยฟิลด์ที่ไม่ได้ส่งจะคงค่าปัจจุบันจาก MySQL; PATCH ต้องมีอย่างน้อยหนึ่งฟิลด์จาก name/position/salary/status และไม่รับฟิลด์อื่น การแก้ไขบันทึกด้วย SQL UPDATE ส่วน DELETE ใช้ SQL DELETE ลบแถวถาวรออกจากตาราง ไม่มี soft delete เมื่อ GET อีกครั้งจะอ่านข้อมูลปัจจุบันจาก MySQL พร้อม `Cache-Control: no-store`
 
 ตัวอย่าง body สำหรับ Users:
 
@@ -101,7 +112,7 @@ npm test
 npm run test:mysql
 ```
 
-`npm test` ทดสอบ config/validation/K-Means โดยไม่แตะฐานข้อมูล ส่วน `test:mysql` ต้องใช้ MySQL/MariaDB สำหรับทดสอบบนเครื่อง local เท่านั้น กำหนด `DB_TEST_HOST` (loopback), `DB_TEST_PORT`, `DB_TEST_USER`, `DB_TEST_PASSWORD` ได้ ชุดทดสอบสร้าง DB ชื่อสุ่ม `bluehr_test_*` แยกจากงานจริงและลบเฉพาะ DB ของตนเองเมื่อจบ ต้องใช้บัญชีทดสอบที่มีสิทธิ์ CREATE/DROP DATABASE
+`npm test` ทดสอบ config/validation/K-Means โดยไม่แตะฐานข้อมูล ส่วน `test:mysql` ต้องใช้ MySQL/MariaDB สำหรับทดสอบบนเครื่อง local เท่านั้น กำหนด `DB_TEST_HOST` (loopback), `DB_TEST_PORT`, `DB_TEST_USER`, `DB_TEST_PASSWORD` ได้ ชุดทดสอบสร้าง DB ชื่อสุ่ม `tnpkhr_test_*` แยกจากงานจริงและลบเฉพาะ DB ของตนเองเมื่อจบ ต้องใช้บัญชีทดสอบที่มีสิทธิ์ CREATE/DROP DATABASE
 
 ครอบคลุม HTTP CRUD พนักงาน/Users, decimal/ภาษาไทย, validation, SQL injection input, role, session revocation, bcrypt PHP และการ restart process API โดยข้อมูลยังอยู่ ไม่ทดสอบด้วยการลบข้อมูลใน `ip_std6730202181`
 
