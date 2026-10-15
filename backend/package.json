@@ -8,7 +8,11 @@
     "start": "node --env-file-if-exists=.env src/server.js",
     "dev": "node --env-file-if-exists=.env --watch src/server.js",
     "test": "node --test",
-    "test:coverage": "node --test --experimental-test-coverage"
+    "test:coverage": "node --test --experimental-test-coverage",
+    "db:check": "node --env-file-if-exists=.env scripts/check-db.js",
+    "create-admin": "node --env-file-if-exists=.env scripts/create-admin.js",
+    "test:mysql": "node --env-file-if-exists=.env --test integration/mysql.mjs",
+    "package:filezilla": "node scripts/package-filezilla.js"
   },
-  "dependencies": { "cors": "^2.8.5", "express": "^5.1.0" }
+  "dependencies": { "cors": "^2.8.5", "express": "^5.1.0", "mysql2": "^3.0.0", "bcryptjs": "^3.0.0", "jsonwebtoken": "^9.0.0" }
 }

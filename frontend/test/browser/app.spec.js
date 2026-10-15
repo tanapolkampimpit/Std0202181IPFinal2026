@@ -1,18 +1,21 @@
 import { test, expect } from '@playwright/test';
 
 let createdId;
-let startingJohnStatus;
-const headers = { Authorization: 'Bearer mock-jwt-token' };
+const apiBase = process.env.BLUEHR_TEST_API_URL ?? 'http://localhost:3000';
+const username = process.env.BLUEHR_TEST_USERNAME;
+const password = process.env.BLUEHR_TEST_PASSWORD;
+let headers;
+test.skip(!username || !password, 'Set BLUEHR_TEST_USERNAME and BLUEHR_TEST_PASSWORD for a disposable database environment.');
 test.afterEach(async ({ request }) => {
-  if (createdId) await request.delete(`http://localhost:3000/api/employees/${createdId}`, { headers });
-  const current = await (await request.get('http://localhost:3000/api/employees', { headers })).json();
-  const john = current.find(({ id }) => id === '1');
-  if (john && startingJohnStatus && john.status !== startingJohnStatus) await request.put('http://localhost:3000/api/employees/1/status', { headers });
+  if (createdId) await request.delete(`${apiBase}/api/employees/${createdId}`, { headers });
+  createdId = undefined;
 });
 
 test('real Expo preview: responsive login, authenticated CRUD and current salary tiers', async ({ page, request }) => {
-  const initial = await (await request.get('http://localhost:3000/api/employees', { headers })).json();
-  startingJohnStatus = initial.find(({ id }) => id === '1').status;
+  const login = await request.post(`${apiBase}/api/login`, { data: { username, password } });
+  expect(login.ok()).toBe(true);
+  headers = { Authorization: `Bearer ${(await login.json()).token}` };
+  const initial = await (await request.get(`${apiBase}/api/employees`, { headers })).json();
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
@@ -23,22 +26,19 @@ test('real Expo preview: responsive login, authenticated CRUD and current salary
   }
   await page.setViewportSize({ width: 375, height: 812 });
   await page.screenshot({ path: 'test-results/preview-login.png', fullPage: true });
-  await page.getByLabel('Username', { exact: true }).fill('admin');
+  await page.getByLabel('Username', { exact: true }).fill(username);
   await page.getByLabel('Password', { exact: true }).fill('wrong-password');
   await page.getByRole('button', { name: 'Sign In' }).click();
   await expect(page.getByText('Invalid username or password.')).toBeVisible();
-  await page.getByLabel('Password', { exact: true }).fill('password123');
+  await page.getByLabel('Password', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'Sign In' }).click();
-  await expect(page.getByText('John Doe', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add Employee', exact: true })).toBeVisible();
   for (const width of [320, 375, 414, 768]) {
     await page.setViewportSize({ width, height: 812 });
     expect(await page.locator('body').evaluate((body) => body.scrollWidth <= body.clientWidth)).toBe(true);
   }
   await page.setViewportSize({ width: 375, height: 812 });
   await page.screenshot({ path: 'test-results/preview-dashboard.png', fullPage: true });
-  await page.getByRole('button', { name: 'Toggle Status for John Doe' }).click();
-  await expect(page.getByText('Employee status updated.')).toBeVisible();
-  await page.getByRole('button', { name: 'Toggle Status for John Doe' }).click();
   await page.getByRole('button', { name: 'Add Employee', exact: true }).click();
   await page.getByRole('button', { name: 'Add Employee', exact: true }).last().click();
   await expect(page.getByText('Please enter the employee’s name.')).toBeVisible();
@@ -50,6 +50,9 @@ test('real Expo preview: responsive login, authenticated CRUD and current salary
   await page.getByRole('button', { name: 'Add Employee', exact: true }).last().click();
   createdId = (await (await createdResponse).json()).id;
   await expect(page.getByText('Employee added successfully.')).toBeVisible();
+  await page.getByRole('button', { name: `Toggle Status for ${uniqueName}` }).click();
+  await expect(page.getByText('Employee status updated.')).toBeVisible();
+  await page.getByRole('button', { name: `Toggle Status for ${uniqueName}` }).click();
   await page.getByRole('button', { name: 'Analyze Salary Structure', exact: true }).click();
   await expect(page.getByText('Tier 1', { exact: true })).toBeVisible();
   await expect(page.getByText(/^Tier [123]$/)).toHaveCount(3);
@@ -63,6 +66,7 @@ test('real Expo preview: responsive login, authenticated CRUD and current salary
   await page.getByRole('button', { name: `Delete ${uniqueName}`, exact: true }).click();
   await page.getByRole('button', { name: 'Delete', exact: true }).click();
   await expect(page.getByText(uniqueName, { exact: true })).toHaveCount(0);
+  createdId = undefined;
   await page.getByRole('button', { name: 'Logout' }).scrollIntoViewIfNeeded();
   await page.getByRole('button', { name: 'Logout' }).click();
   await expect(page.getByRole('button', { name: 'Sign In' })).toBeVisible();
