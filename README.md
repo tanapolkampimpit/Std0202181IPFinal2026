@@ -1,93 +1,70 @@
 # Std0202181IPFinal2026 — TNPKHR
 
-React Native + Expo frontend and Express + MySQL API for student `6730202181`.
+โปรเจกต์จัดการพนักงานและวิเคราะห์เงินเดือน: Frontend ใช้ React Native + Expo, Backend ใช้ Express + MySQL
+
+**ทำตามลำดับ: 1. อัปโหลดและรัน Backend → 2. เปิด Frontend → 3. ล็อกอิน**
+
 Repository: https://github.com/tanapolkampimpit/Std0202181IPFinal2026
 
-## Structure
-
-- `frontend/`: Expo application: login, employee list/create/edit/status/delete and salary clustering.
-- `backend/`: persistent MySQL API, database login, employee/user CRUD, salary clustering and `run.sh`.
-- [Backend deployment guide](backend/README.md): configuration, FileZilla, endpoints and tests.
-
-The frontend follows the supplied standalone HTML reference: forest/teal palette, curved login hero, compact employee rows, search, four-item navigation, and selectable salary groups. Analytics adds the four charts from the supplied chart reference: average salary bars, employee distribution donut, salary range with centroid, and salary scatter plot. All interface text uses bundled Noto Sans Thai (Thai and Latin) with larger captions and inputs; the TNPKHR logo retains its own typeface. Employee data, counts and chart values come from the API. The reference's sample accounts and employee array are not part of the application.
-
-The backend requires MySQL. It has no employee seed data, memory storage mode, fixed login or fixed bearer token. It reads the existing tables `Thanapol_Kha_Employee` and `Thanapol_Kha_Users` in `ip_std6730202181`. Starting the API does not create tables or insert users/employees.
-
-## 1. Run Front — รันบนเครื่องตัวเอง
-
-ติดตั้ง Node.js **22.13 ขึ้นไป** พร้อม npm ก่อน จากนั้นเปิด PowerShell ที่โฟลเดอร์โปรเจกต์ (ถ้ายังไม่มี source ให้ clone ก่อน):
+ถ้ายังไม่มี source ให้เปิด PowerShell บนคอมพิวเตอร์แล้วดาวน์โหลดก่อน (ข้ามถ้ามีโปรเจกต์อยู่แล้ว):
 
 ```powershell
 git clone https://github.com/tanapolkampimpit/Std0202181IPFinal2026.git
-cd Std0202181IPFinal2026
-cd frontend
-npm ci
-if (!(Test-Path .env)) { Copy-Item .env.example .env }
-notepad .env
 ```
 
-ตั้งค่าใน `frontend/.env` แล้วบันทึกไฟล์:
+## 1. เอา Backend ขึ้น FileZilla แล้วรันบนเซิร์ฟเวอร์
 
-```dotenv
-EXPO_PUBLIC_API_URL=http://119.59.102.161:3019
-```
+ใช้ Node.js **22.13 ขึ้นไป**, npm และ MySQL ที่มีตาราง `Thanapol_Kha_Employee` / `Thanapol_Kha_Users` ในฐานข้อมูล `ip_std6730202181` อยู่แล้ว การรัน API ไม่สร้างตารางหรือเพิ่มข้อมูลอัตโนมัติ
 
-เปิดแอปด้วยคำสั่ง:
+### 1.1 อัปโหลด Backend ด้วย FileZilla
 
-```powershell
-npm start -- --clear
-```
+1. เปิด FileZilla แล้วเชื่อมต่อด้วย Host, Username, Password/Key และ Port ที่ผู้ดูแลเซิร์ฟเวอร์ให้
+2. ฝั่ง **Local (ซ้าย)** เปิดโฟลเดอร์ `Std0202181IPFinal2026/backend`
+3. ฝั่ง **Remote (ขวา)** สร้าง/เปิดโฟลเดอร์ของงาน เช่น `/app/tnpkhr-api`
+4. ลาก **ไฟล์และโฟลเดอร์ข้างใน `backend`** ไปไว้ใน `/app/tnpkhr-api` โดยตรง ยกเว้น `.env`, `node_modules`, coverage และผลทดสอบ
+5. รอให้อัปโหลดเสร็จ ต้องเห็น `run.sh`, `package.json`, `package-lock.json`, `.env.example`, `src/`, `scripts/` และ `sql/` ในโฟลเดอร์ปลายทาง
 
-- กด `w` ใน Terminal เพื่อเปิดเว็บ หรือใช้ `npm run web -- --clear` เพื่อเปิดเว็บโดยตรง
-- มือถือ Android ใช้ Expo Go สแกน QR; iPhone ใช้กล้องสแกนแล้วเปิดด้วย Expo Go เวอร์ชันที่รองรับ Expo SDK ของโปรเจกต์
-- คอมพิวเตอร์และมือถือควรอยู่ Wi-Fi เดียวกันสำหรับเชื่อมต่อ Expo
-- เข้าระบบด้วยบัญชีจริงในตาราง `Thanapol_Kha_Users` ไม่มีบัญชีหรือรหัสผ่านตายตัว
-- Backend ที่ URL ข้างต้นต้องรันอยู่จึงจะล็อกอินและโหลดข้อมูลได้ หากยังไม่รัน ให้ทำข้อ 2 ก่อน
+หากไม่เห็น `.env.example` ให้เปิดการแสดงไฟล์ซ่อนใน FileZilla ถ้าอัปเดตงานเดิมให้เก็บ `.env` ของเซิร์ฟเวอร์ไว้ และใช้โฟลเดอร์ของงานนี้โดยไม่ทับ `/app/run.sh` หรือ `/app/.env` ของงานอื่น
 
-URL นี้เป็นค่าที่ตั้งไว้สำหรับงานนี้ ไม่ใช่ผลยืนยันว่าเซิร์ฟเวอร์ออนไลน์อยู่ ใส่เฉพาะ base URL **ไม่ต่อ `/api`** และ restart Expo ทุกครั้งหลังเปลี่ยน `.env` ถ้าย้ายเซิร์ฟเวอร์ให้แก้ URL ตามที่อยู่ใหม่; ถ้าใช้ API บนเครื่องตัวเองกับมือถือ ให้ใช้ LAN IP ของคอมพิวเตอร์แทน `localhost`
+**FileZilla ใช้อัปโหลดไฟล์ ส่วนคำสั่งด้านล่างให้พิมพ์ใน SSH/Terminal ของเซิร์ฟเวอร์** ใช้ Terminal ของ hosting หรือ PuTTY/SSH ตามที่ผู้ดูแลจัดให้
 
-## 2. เอา Backend ขึ้นเซิร์ฟเวอร์ผ่าน FileZilla
+### 1.2 เข้าโฟลเดอร์ด้วย `ls` และ `cd`
 
-FileZilla ใช้อัปโหลดไฟล์ ส่วนคำสั่งรันต้องพิมพ์ใน **SSH/Terminal ของเซิร์ฟเวอร์** เครื่องเซิร์ฟเวอร์ต้องมี Node.js 22.13+, npm และเชื่อมต่อ MySQL ได้
-
-### 2.1 เตรียมไฟล์บนคอมพิวเตอร์
-
-เปิด PowerShell อีกหน้าที่โฟลเดอร์โปรเจกต์:
-
-```powershell
-cd backend
-npm run package:filezilla -- ../../TNPKHR_API_FileZilla_upload
-```
-
-จะได้โฟลเดอร์ `TNPKHR_API_FileZilla_upload` อยู่ข้างโฟลเดอร์ repository เป็นชุด Backend จาก source ปัจจุบัน โดยไม่รวม `.env` และ `node_modules` ถ้าชื่อนี้มีอยู่แล้ว ให้เปลี่ยนเป็นชื่อใหม่ เช่น `TNPKHR_API_FileZilla_upload_v2`
-
-### 2.2 อัปโหลดด้วย FileZilla
-
-1. เชื่อมต่อด้วย Host, Username, Password/Key และ Port ที่ผู้ดูแลเซิร์ฟเวอร์ให้มา
-2. ฝั่ง Remote สร้าง/เปิดโฟลเดอร์ของงานนี้ เช่น `/app/tnpkhr-api` (ถ้า hosting ให้ path อื่น ให้ใช้ path นั้นแทนทุกคำสั่งด้านล่าง)
-3. ฝั่ง Local เปิด `TNPKHR_API_FileZilla_upload` แล้วอัปโหลด **ไฟล์และโฟลเดอร์ข้างใน** เข้า `/app/tnpkhr-api` โดยตรง
-4. ตรวจว่ามี `/app/tnpkhr-api/run.sh`, `package.json`, `package-lock.json`, `.env.example`, `src/`, `scripts/` และ `sql/` หากไม่เห็น `.env.example` ให้เปิดการแสดงไฟล์ซ่อนใน FileZilla
-
-ไม่อัปโหลด `.env` จากคอมพิวเตอร์หรือ `node_modules` และไม่ทับ `/app/run.sh` หรือ `/app/.env` ของงานอื่น หากอัปเดตงานเดิม ให้เก็บ `.env` ของเซิร์ฟเวอร์ไว้
-
-### 2.3 ตั้งค่าครั้งแรกบนเซิร์ฟเวอร์
-
-เข้า SSH ด้วยบัญชีที่ผู้ดูแลให้ แล้วพิมพ์:
+หลังเปิด SSH/Terminal ของเซิร์ฟเวอร์แล้ว พิมพ์ทีละบรรทัด:
 
 ```bash
-cd /app/tnpkhr-api
+pwd
+ls
+cd /app
+ls
+cd tnpkhr-api
+pwd
+ls -la
+```
+
+- `pwd` แสดงว่าตอนนี้อยู่โฟลเดอร์ไหน
+- `ls` แสดงไฟล์และโฟลเดอร์; `ls -la` แสดงไฟล์ซ่อนอย่าง `.env` ด้วย
+- `cd` ใช้เข้าโฟลเดอร์; `cd ..` ใช้ถอยกลับหนึ่งระดับ
+
+ตัวอย่างนี้ต้องได้ตำแหน่ง `/app/tnpkhr-api` และเห็น `run.sh` กับ `package.json` ถ้า Remote path ใน FileZilla ต่างจากตัวอย่าง ให้ใช้ path จริงนั้น เช่น `cd /home/YOUR_USER/tnpkhr-api` ถ้าเห็นโฟลเดอร์ `backend` อยู่ข้างในแทน ให้ `cd backend` แล้ว `ls -la` ก่อนรัน
+
+### 1.3 ตั้งค่า Backend ครั้งแรก
+
+เมื่ออยู่ในโฟลเดอร์ที่มี `run.sh` แล้ว:
+
+```bash
 node --version
 npm --version
 bash run.sh
 ```
 
-หากยังไม่มี `.env` สคริปต์จะสร้างไฟล์ส่วนตัวจาก `.env.example` พร้อม `JWT_SECRET` สุ่ม แล้ว **หยุดให้ตั้งค่า** เป็นพฤติกรรมปกติของการติดตั้งครั้งแรก เปิดไฟล์ด้วย:
+ถ้ายังไม่มี `.env` สคริปต์จะสร้างไฟล์พร้อม `JWT_SECRET` สุ่ม แล้วหยุดให้กรอกข้อมูล เป็นขั้นตอนปกติของการติดตั้งครั้งแรก เปิดไฟล์ด้วย:
 
 ```bash
 nano .env
 ```
 
-ตั้งค่าพอร์ตให้ตรงกับ Frontend และกรอกข้อมูล MySQL ที่ผู้ดูแลให้:
+กรอกค่าต่อไปนี้ให้ตรงกับเซิร์ฟเวอร์ โดย **เก็บบรรทัด `JWT_SECRET` ที่สคริปต์สร้างไว้ด้วย**:
 
 ```dotenv
 APP_HOST=0.0.0.0
@@ -101,46 +78,57 @@ DB_CONNECTION_LIMIT=5
 CORS_ORIGINS=*
 ```
 
-เก็บบรรทัด `JWT_SECRET` ที่สคริปต์สร้างไว้ด้วย ไม่ลบหรือแทนด้วยค่าว่าง หากใช้ nano ให้กด `Ctrl+O`, `Enter` เพื่อบันทึก แล้ว `Ctrl+X` เพื่อออก
+ใช้ข้อมูล MySQL ที่ผู้ดูแลให้ `DB_HOST=127.0.0.1` ใช้เมื่อ MySQL อยู่เครื่อง/container เดียวกับ Node เท่านั้น บันทึกใน nano ด้วย `Ctrl+O`, `Enter` แล้วออกด้วย `Ctrl+X` ถ้ามี `.env` ที่ตั้งค่าถูกต้องแล้ว ให้ข้ามการตั้งค่าใหม่
 
-`DB_HOST=127.0.0.1` ใช้ได้เมื่อ MySQL อยู่เครื่อง/container เดียวกับ Node เท่านั้น ถ้าแยกเครื่องให้ใช้ host ที่เซิร์ฟเวอร์ Node เชื่อมถึง ตารางจริงต้องมีอยู่แล้ว; ดู [schema อ้างอิง](backend/sql/schema.sql) และ [รายละเอียด Backend](backend/README.md)
-
-### 2.4 คำสั่งตรวจและรัน Backend
+### 1.4 ตรวจฐานข้อมูลและรัน Backend
 
 ```bash
-cd /app/tnpkhr-api
 bash run.sh check
 bash run.sh
 ```
 
-**คำสั่งรันคือ `bash run.sh`** สคริปต์ติดตั้ง dependencies ตาม lockfile แล้วเริ่ม API แบบ foreground ให้เปิด Terminal นี้ค้างไว้ ถ้า `check` ไม่ผ่าน ให้แก้ DB/config ตามข้อความก่อนเริ่ม API
+**คำสั่งเริ่ม Backend คือ `bash run.sh`** สคริปต์ติดตั้ง dependencies ตาม lockfile แล้วเปิด API พอร์ต `3019` ให้เปิด Terminal นี้ค้างไว้ ถ้า `check` ไม่ผ่าน ให้แก้ `.env` หรือการเชื่อมต่อ DB ตามข้อความก่อน
 
-เปิด SSH อีกหน้าหรือทดสอบจากคอมพิวเตอร์:
+เปิด SSH อีกหน้าเพื่อตรวจว่า API พร้อม:
 
 ```bash
-# บนเซิร์ฟเวอร์
 curl http://127.0.0.1:3019/api/health
 ```
 
+บนคอมพิวเตอร์ เปิด PowerShell แล้วตรวจการเข้าถึงจากภายนอก:
+
 ```powershell
-# บนคอมพิวเตอร์
 Invoke-RestMethod http://119.59.102.161:3019/api/health
 ```
 
-ควรได้ HTTP 200 เมื่อ DB พร้อม หากภายในเซิร์ฟเวอร์ใช้ได้แต่จากคอมพิวเตอร์เข้าไม่ได้ ให้ตรวจพอร์ต 3019 / reverse proxy ตามที่ hosting จัดให้ แล้วกลับไปรัน Frontend ในข้อ 1
+ควรได้ HTTP 200 เมื่อฐานข้อมูลพร้อม หากเรียกในเซิร์ฟเวอร์ได้แต่จากคอมพิวเตอร์ไม่ได้ ให้ตรวจพอร์ต 3019 / reverse proxy ของ hosting URL นี้เป็นค่าของงานที่ตั้งไว้ หากย้ายเซิร์ฟเวอร์ให้เปลี่ยนตามที่อยู่ใหม่
 
-หากยังไม่มีบัญชี ให้หยุด API ด้วย `Ctrl+C` แล้วสร้างบัญชีอย่างตั้งใจ (ข้ามเมื่อมีบัญชีใช้อยู่แล้ว):
+### 1.5 บัญชีสำหรับหน้า Frontend
+
+ใช้บัญชีที่ระบุสำหรับงานนี้:
+
+| ช่องบนหน้า Login | ค่าที่กรอก |
+| --- | --- |
+| Username | `Admin` |
+| Password | `password123` |
+
+หากเป็นฐานข้อมูลใหม่ที่ยังไม่มีบัญชีนี้ ให้หยุด API ด้วย `Ctrl+C` แล้วรัน:
 
 ```bash
-bash run.sh create-admin admin
+bash run.sh create-admin Admin
+```
+
+เมื่อขึ้น `New admin password (8+ characters):` ให้พิมพ์ `password123` แล้ว Enter จากนั้นพิมพ์ `password123` อีกครั้งเมื่อขึ้น `Confirm password:` ขณะพิมพ์จะไม่เห็นตัวอักษรบนหน้าจอ เมื่อสร้างสำเร็จให้เริ่ม API อีกครั้ง:
+
+```bash
 bash run.sh
 ```
 
-ระบบจะให้กรอกรหัสผ่านแบบซ่อนและยืนยันซ้ำ คำสั่งนี้เพิ่มบัญชีใหม่ ไม่เปลี่ยนรหัสผ่านบัญชีเดิม
+หากมีบัญชีอยู่แล้วให้ข้ามการสร้าง บัญชีต้องมีอยู่ในตาราง `Thanapol_Kha_Users` พร้อมรหัสผ่านตรงกัน Backend ตรวจรหัสผ่านจากฐานข้อมูลจริง คำสั่ง `create-admin` ไม่เปลี่ยนรหัสผ่านบัญชีเดิม
 
-### 2.5 ให้ทำงานต่อหลังปิด SSH (เมื่อเซิร์ฟเวอร์มี PM2)
+### 1.6 ถ้าต้องการปิด SSH แล้ว Backend ยังทำงาน (กรณีมี PM2)
 
-ถ้ารัน foreground อยู่ ให้หยุดด้วย `Ctrl+C` ก่อน เพื่อให้พอร์ต 3019 ว่าง แล้วใช้:
+หยุดการรันแบบเดิมด้วย `Ctrl+C` ก่อน แล้วใช้ path จริงของโฟลเดอร์ที่อัปโหลด:
 
 ```bash
 cd /app/tnpkhr-api
@@ -148,7 +136,39 @@ pm2 start /app/tnpkhr-api/run.sh --interpreter bash --name tnpkhr-ip-final
 pm2 logs tnpkhr-ip-final
 ```
 
-หลังอัปโหลด source รุ่นใหม่ ใช้ `pm2 restart tnpkhr-ip-final` แล้วตรวจ health อีกครั้ง ถ้ายังไม่มี PM2 ให้ใช้ process manager ที่ hosting กำหนด การกลับมาทำงานหลัง reboot ต้องตั้ง startup ตามระบบของผู้ให้บริการ
+เมื่ออัปโหลดโค้ดใหม่ ใช้ `pm2 restart tnpkhr-ip-final` แล้วตรวจ health อีกครั้ง ถ้า hosting ใช้ process manager อื่น ให้ใช้ตามที่ผู้ดูแลกำหนด การเริ่มเองหลัง reboot ต้องตั้ง startup ตามระบบของ hosting
+
+## 2. เปิด Frontend บนคอมพิวเตอร์
+
+ติดตั้ง Node.js **22.13 ขึ้นไป** พร้อม npm แล้วเปิด PowerShell **อีกหน้าในโฟลเดอร์ `Std0202181IPFinal2026` บนคอมพิวเตอร์** โดยให้ Backend ทำงานค้างไว้บนเซิร์ฟเวอร์:
+
+```powershell
+ls
+cd frontend
+npm ci
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
+notepad .env
+```
+
+ตั้งค่า `frontend/.env` แล้วบันทึกไฟล์:
+
+```dotenv
+EXPO_PUBLIC_API_URL=http://119.59.102.161:3019
+```
+
+ใช้ base URL โดยไม่ต่อ `/api` และให้ตรงกับ Backend จากข้อ 1 จากนั้นรัน:
+
+```powershell
+npm start -- --clear
+```
+
+- กด `w` ใน Terminal เพื่อเปิดเว็บ หรือใช้ `npm run web -- --clear` เพื่อเปิดเว็บโดยตรง
+- มือถือใช้ Expo Go เวอร์ชันที่รองรับ SDK ของโปรเจกต์สแกน QR โดยคอมพิวเตอร์และมือถือควรอยู่ Wi-Fi เดียวกัน
+- เมื่อหน้า Login แสดง ให้กรอก **Username: `Admin` / Password: `password123`** แล้วกด **Sign In**
+- หากล็อกอินไม่ได้ ให้ตรวจ health ในข้อ 1.4, URL ใน `frontend/.env` และบัญชีในฐานข้อมูลตามข้อ 1.5
+- หลังเปลี่ยน `.env` ให้หยุด Expo ด้วย `Ctrl+C` แล้วรัน `npm start -- --clear` ใหม่
+
+ดูรายละเอียด API และการตั้งค่าเพิ่มเติมที่ [backend/README.md](backend/README.md)
 
 ## Backend บนเครื่องตัวเอง (ทางเลือก)
 
@@ -175,7 +195,7 @@ Configuration is read from `backend/.env`, including when started from another w
 | JWT_SECRET | Stable random secret, at least 32 bytes |
 | CORS_ORIGINS | `*`, comma-separated origins, or JSON array |
 
-`localhost` means the machine/container running Node. phpMyAdmin and Node may run in different containers. Use the database host supplied by the hosting provider. Login uses an existing bcrypt password hash in the Users table. For an empty Users table, create an account deliberately with `bash run.sh create-admin admin` on the server. There are no default credentials.
+`localhost` means the machine/container running Node. phpMyAdmin and Node may run in different containers. Use the database host supplied by the hosting provider. Login uses an existing bcrypt password hash in the Users table. For a new database without the project account, use `bash run.sh create-admin Admin` on the server and enter the password listed in step 1.5. Existing accounts are not changed automatically.
 
 ## การใช้งาน Frontend และ session
 

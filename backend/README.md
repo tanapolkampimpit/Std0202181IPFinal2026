@@ -2,7 +2,7 @@
 
 API นี้ใช้ตารางจริง `Thanapol_Kha_Employee` และ `Thanapol_Kha_Users` ในฐานข้อมูล `ip_std6730202181` ไม่มีข้อมูลพนักงานตัวอย่างหรือบัญชีล็อกอินตายตัว
 
-คู่มือเริ่มจากรัน Frontend จนถึงอัปโหลดด้วย FileZilla อยู่ใน [README หลัก](../README.md) หากอ่านไฟล์นี้จากชุดอัปโหลด ให้เปิดคู่มือที่ [GitHub](https://github.com/tanapolkampimpit/Std0202181IPFinal2026#readme) คำสั่งรัน Backend บนเซิร์ฟเวอร์คือ `cd /app/tnpkhr-api` แล้ว `bash run.sh` โดยเปลี่ยน path ให้ตรงกับโฟลเดอร์ที่อัปโหลดจริง
+คู่มือเริ่มจากอัปโหลด Backend ด้วย FileZilla → ใช้ `ls` / `cd` ใน SSH → รัน Backend → เปิด Frontend และล็อกอิน อยู่ใน [README หลัก](../README.md) หากอ่านไฟล์นี้จากชุดอัปโหลด ให้เปิดคู่มือที่ [GitHub](https://github.com/tanapolkampimpit/Std0202181IPFinal2026#readme) คำสั่งรัน Backend บนเซิร์ฟเวอร์คือ `cd /app/tnpkhr-api` แล้ว `bash run.sh` โดยเปลี่ยน path ให้ตรงกับโฟลเดอร์ที่อัปโหลดจริง
 
 ## Config
 
@@ -35,14 +35,19 @@ npm start
 
 ## FileZilla + run.sh
 
-เปิด Terminal ที่ `backend/` แล้วสร้างโฟลเดอร์สำหรับอัปโหลดจาก source ปัจจุบันด้วย `npm run package:filezilla -- ../../TNPKHR_API_FileZilla_upload` จะได้ `TNPKHR_API_FileZilla_upload` ข้างโฟลเดอร์ repository โดยไม่คัดลอก `.env` หรือ `node_modules` หากโฟลเดอร์ปลายทางมีอยู่แล้ว ให้ระบุชื่อใหม่ สคริปต์ไม่ทับไฟล์เดิม หากไม่ระบุปลายทางจะใช้ชื่อ `TNPKHR_API_FileZilla`
+อัปโหลดไฟล์ข้างใน `backend/` ผ่าน FileZilla ได้โดยตรง ยกเว้น `.env`, `node_modules`, coverage และผลทดสอบ หรือถ้าต้องการชุดอัปโหลดแยก ให้เปิด Terminal ที่ `backend/` แล้วใช้ `npm run package:filezilla -- ../../TNPKHR_API_FileZilla_upload` จะได้ `TNPKHR_API_FileZilla_upload` ข้างโฟลเดอร์ repository โดยไม่คัดลอก `.env` หรือ `node_modules` หากโฟลเดอร์ปลายทางมีอยู่แล้ว ให้ระบุชื่อใหม่ สคริปต์ไม่ทับไฟล์เดิม หากไม่ระบุปลายทางจะใช้ชื่อ `TNPKHR_API_FileZilla`
 
 1. สร้างโฟลเดอร์ใหม่ เช่น `/app/tnpkhr-api` บนเซิร์ฟเวอร์ แล้วอัปโหลดไฟล์ข้างในชุดอัปโหลดเข้าไปโดยตรง ให้ `run.sh` อยู่ที่ `/app/tnpkhr-api/run.sh` ยกเว้น `.env`, `node_modules`, coverage และผลทดสอบ ไม่ทับ `/app/run.sh` หรือ `.env` ของงานอื่น FileZilla ใช้โอนไฟล์ ส่วนการรันใช้ SSH/Terminal
 2. เปิด SSH/Terminal แล้วเข้าโฟลเดอร์ใหม่
 3. ถ้ามี `.env` ที่ตั้งค่าแล้ว ให้วางไว้ในโฟลเดอร์ใหม่นี้ด้วยตนเอง หากยังไม่มี รันครั้งแรกจะสร้างจาก `.env.example` พร้อม JWT secret สุ่ม แล้วหยุดให้กรอกข้อมูล MySQL
 
 ```bash
-cd /app/tnpkhr-api
+pwd
+ls
+cd /app
+ls
+cd tnpkhr-api
+ls -la
 bash run.sh
 # หากเพิ่งสร้าง .env สคริปต์จะหยุด ให้แก้ข้อมูล DB และ APP_PORT=3019 ก่อน
 nano .env
@@ -52,7 +57,11 @@ bash run.sh check
 bash run.sh
 ```
 
-ถ้ายังไม่มีบัญชีจึงค่อยใช้ `bash run.sh create-admin admin` แล้วกรอกรหัสผ่านแบบซ่อนและยืนยันซ้ำ หากมีบัญชีจริงอยู่แล้วให้ข้ามขั้นตอนนี้ ตรวจ API ใน SSH อีกหน้าด้วย `curl http://127.0.0.1:3019/api/health` และตรวจจากเครื่องตัวเองด้วย URL `http://119.59.102.161:3019/api/health` ควรได้ HTTP 200 เมื่อฐานข้อมูลพร้อม URL นี้เป็นค่าที่ตั้งไว้ของงาน ไม่ใช่ผลยืนยันว่าเซิร์ฟเวอร์กำลังออนไลน์
+`ls` ใช้ดูไฟล์/โฟลเดอร์, `cd` ใช้เข้าโฟลเดอร์ และ `ls -la` แสดงไฟล์ซ่อน เช่น `.env` ก่อนรันต้องเห็น `run.sh` และ `package.json` หากอัปโหลดไว้ path อื่น ให้ใช้ path นั้นแทน `/app/tnpkhr-api`
+
+บัญชีสำหรับหน้า Frontend ตามที่ระบุสำหรับงานนี้คือ **Username: `Admin` / Password: `password123`** ถ้าฐานข้อมูลยังไม่มีบัญชีนี้จึงค่อยใช้ `bash run.sh create-admin Admin` แล้วกรอก `password123` เมื่อถามรหัสผ่านและกรอกซ้ำเพื่อยืนยัน (ขณะพิมพ์ไม่แสดงตัวอักษร) หากมีบัญชีจริงอยู่แล้วให้ข้ามขั้นตอนนี้ บัญชีและรหัสผ่านต้องตรงกับข้อมูลใน `Thanapol_Kha_Users`
+
+ตรวจ API ใน SSH อีกหน้าด้วย `curl http://127.0.0.1:3019/api/health` และตรวจจากเครื่องตัวเองด้วย URL `http://119.59.102.161:3019/api/health` ควรได้ HTTP 200 เมื่อฐานข้อมูลพร้อม URL นี้เป็นค่าที่ตั้งไว้ของงาน ไม่ใช่ผลยืนยันว่าเซิร์ฟเวอร์กำลังออนไลน์
 
 `create-admin` เพิ่มบัญชีใหม่ ไม่เปลี่ยนรหัสผ่านบัญชีที่มีอยู่แล้ว API ไม่สร้างบัญชีอัตโนมัติ ไม่รีเซ็ตตาราง และไม่เพิ่มพนักงานอัตโนมัติ
 
